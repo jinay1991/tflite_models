@@ -14,7 +14,7 @@ cc_binary(
     visibility = [
         "//visibility:public",
     ],
-    # deps = [
-    #     "@tensorflow//tensorflow/lite:framework",
-    # ],
+    deps = [
+        "@org_tensorflow//tensorflow/lite:framework",
+    ],
 )

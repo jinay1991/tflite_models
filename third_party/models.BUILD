@@ -6,6 +6,10 @@ filegroup(
 
 filegroup(
     name = "tfmodel",
-    srcs = glob(["**/*.pb"]),
+    srcs = glob([
+        "**/*.pb",
+        "**/*.pbtxt",
+        "**/*_info.txt",
+    ]),
     visibility = ["//visibility:public"],
 )
