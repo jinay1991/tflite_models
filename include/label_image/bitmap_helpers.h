@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_BITMAP_HELPERS_H_
-#define TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_BITMAP_HELPERS_H_
+#ifndef LABEL_IMAGE_BITMAP_HELPERS_H_
+#define LABEL_IMAGE_BITMAP_HELPERS_H_
 
 #include "label_image/bitmap_helpers_impl.h"
 #include "label_image/label_image.h"
@@ -36,4 +36,4 @@ template void resize<float>(float*, unsigned char*, int, int, int, int, int, int
 }  // namespace label_image
 }  // namespace tflite
 
-#endif  // TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_BITMAP_HELPERS_H_
+#endif  // LABEL_IMAGE_BITMAP_HELPERS_H_

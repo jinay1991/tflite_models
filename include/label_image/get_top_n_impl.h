@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_GET_TOP_N_IMPL_H_
-#define TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_GET_TOP_N_IMPL_H_
+#ifndef LABEL_IMAGE_GET_TOP_N_IMPL_H_
+#define LABEL_IMAGE_GET_TOP_N_IMPL_H_
 
 #include <algorithm>
 #include <functional>
@@ -72,4 +72,4 @@ void get_top_n(T* prediction, int prediction_size, size_t num_results, float thr
 }  // namespace label_image
 }  // namespace tflite
 
-#endif  // TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_GET_TOP_N_IMPL_H_
+#endif  // LABEL_IMAGE_GET_TOP_N_IMPL_H_

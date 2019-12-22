@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_LABEL_IMAGE_H_
-#define TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_LABEL_IMAGE_H_
+#ifndef LABEL_IMAGE_LABEL_IMAGE_H_
+#define LABEL_IMAGE_LABEL_IMAGE_H_
 
 #include <string>
 
@@ -47,9 +47,10 @@ struct Settings
     int max_profiling_buffer_entries = 1024;
     int number_of_warmup_runs = 2;
 };
-int Main(int argc, char** argv);
+
+void RunInference(Settings* s);
 
 }  // namespace label_image
 }  // namespace tflite
 
-#endif  // TENSORFLOW_LITE_EXAMPLES_LABEL_IMAGE_LABEL_IMAGE_H_
+#endif  // LABEL_IMAGE_LABEL_IMAGE_H_
