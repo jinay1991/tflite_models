@@ -1,5 +1,5 @@
 cc_binary(
-    name = "tflite-app",
+    name = "tflite_app",
     srcs = ["src/main.cpp"],
     copts = [
         "-std=c++14",
