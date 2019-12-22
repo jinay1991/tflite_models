@@ -1,19 +1,17 @@
-///
-/// @file
-///
-#include <experimental/filesystem>
-#include <iostream>
+/* Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 
-int main(int argc, char** argv)
-{
-    if (std::experimental::filesystem::exists("external/mobilenet_v2_1.0_224_quant/mobilenet_v2_1.0_224_quant.tflite"))
-    {
-        std::cout << "found model" << std::endl;
-    }
-    else
-    {
-        std::cout << "not found model" << std::endl;
-    }
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    return 0;
-}
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================*/
+#include "label_image/label_image.h"
+
+int main(int argc, char** argv) { return tflite::label_image::Main(argc, argv); }
