@@ -1,10 +1,7 @@
 # TensorFlow Lite C++ image classification
 
-This example shows how you can load a pre-trained and converted
+This repository contains source code demonstrating how to load a pre-trained and converted
 TensorFlow Lite model and use it to recognize objects in images.
-
-Before you begin,
-make sure you [have TensorFlow installed](https://www.tensorflow.org/install).
 
 You also need to [install Bazel 26.1](https://docs.bazel.build/versions/master/install.html)
 in order to build this example code. And be sure you have the Python `future`
@@ -13,6 +10,8 @@ module installed:
 ```
 pip install future --user
 ```
+
+Note that, this repository uses `tensorflow` as bazel external dependency.
 
 ## Build 
 
