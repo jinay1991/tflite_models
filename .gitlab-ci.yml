@@ -11,7 +11,14 @@ docker-build-master:
   only:
     - master
 
-build:
+bazel-build:
   image: registry.gitlab.com/jinay1991/tflite_models
+  stage: build
   script:
     - bazel build //...
+
+bazel-test:
+  image: registry.gitlab.com/jinay1991/tflite_models
+  stage: test
+  script:
+    - bazel test //...
