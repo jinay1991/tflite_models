@@ -1,6 +1,5 @@
 docker-build-master:
-  # Official docker image.
-  image: docker:latest
+  image: registry.gitlab.com/jinay1991/tflite_models
   stage: build
   services:
     - docker:dind
