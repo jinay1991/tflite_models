@@ -212,7 +212,10 @@ void RunInference(Settings* s)
     std::vector<uint8_t> in = read_bmp(s->input_bmp_name, &image_width, &image_height, &image_channels, s);
 
     int input = interpreter->inputs()[0];
-    if (s->verbose) LOG(INFO) << "input: " << input << "\n";
+    if (s->verbose)
+    {
+        LOG(INFO) << "input: " << input << "\n";
+    }
 
     const std::vector<int> inputs = interpreter->inputs();
     const std::vector<int> outputs = interpreter->outputs();
@@ -272,8 +275,12 @@ void RunInference(Settings* s)
     auto profiler = absl::make_unique<profiling::Profiler>(s->max_profiling_buffer_entries);
     interpreter->SetProfiler(profiler.get());
 
-    if (s->profiling) profiler->StartProfiling();
+    if (s->profiling)
+    {
+        profiler->StartProfiling();
+    }
     if (s->loop_count > 1)
+    {
         for (int i = 0; i < s->number_of_warmup_runs; i++)
         {
             if (interpreter->Invoke() != kTfLiteOk)
@@ -281,6 +288,7 @@ void RunInference(Settings* s)
                 LOG(FATAL) << "Failed to invoke tflite!\n";
             }
         }
+    }
 
     struct timeval start_time, stop_time;
     gettimeofday(&start_time, nullptr);
@@ -307,6 +315,23 @@ void RunInference(Settings* s)
             PrintProfilingInfo(profile_events[i], op_index, registration);
         }
     }
+
+    ///-------------------
+    auto tensor = interpreter->tensor(1);
+    const auto dirname = "intermediate_layers";
+    if (!std::experimental::filesystem::create_directory(dirname))
+    {
+        LOG(FATAL) << "Unable to create directory\n";
+        exit(-1);
+    }
+    for (auto idx = 0U; idx < interpreter->tensors_size(); idx++)
+    {
+        std::stringstream filename;
+        filename << dirname << "/" << idx << ".txt";
+        std::ofstream f(filename.str());
+        f.write(interpreter->tensor(idx)->data.raw_const, interpreter->tensor(idx)->bytes);
+    }
+    ///-------------------
 
     const float threshold = 0.001f;
 
