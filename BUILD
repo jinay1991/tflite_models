@@ -2,6 +2,11 @@ load("@org_tensorflow//tensorflow/lite:build_def.bzl", "tflite_linkopts")
 
 package(default_visibility = ["//visibility:public"])
 
+config_setting(
+    name = "darwin",
+    constraint_values = ["@bazel_tools//platforms:osx"],
+)
+
 exports_files(glob([
     "data/*.bmp",
     "data/*.txt",
@@ -22,6 +27,10 @@ cc_library(
         "include/label_image/get_top_n_impl.h",
         "include/label_image/label_image.h",
     ],
+    linkopts = select({
+        ":darwin": [],
+        "//conditions:default": ["-lstdc++fs"],
+    }),
     strip_include_prefix = "include",
     deps = [
         "@com_google_absl//absl/memory",
