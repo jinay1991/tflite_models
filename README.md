@@ -1,4 +1,4 @@
-# TensorFlow Lite C++ image classification demo
+# TensorFlow Lite C++ image classification
 
 This example shows how you can load a pre-trained and converted
 TensorFlow Lite model and use it to recognize objects in images.
@@ -14,30 +14,14 @@ module installed:
 pip install future --user
 ```
 
-## Build the example
+## Build 
 
-First run `$TENSORFLOW_ROOT/configure`. To build for Android, set
-Android NDK or configure NDK setting in
-`$TENSORFLOW_ROOT/WORKSPACE` first.
+First run `$TENSORFLOW_ROOT/configure`. 
 
 Build it for desktop machines (tested on Ubuntu and OS X):
 
 ```
-bazel build -c opt --cxxopt=-std=c++11 //tensorflow/lite/examples/label_image:label_image
-```
-
-Build it for Android ARMv8:
-
-```
-bazel build -c opt --cxxopt=-std=c++11 --config=android_arm64 \
-  //tensorflow/lite/examples/label_image:label_image
-```
-
-Build it for Android arm-v7a:
-
-```
-bazel build -c opt --cxxopt=-std=c++11 --config=android_arm \
-  //tensorflow/lite/examples/label_image:label_image
+bazel build -c opt //:label_image
 ```
 
 ## Download sample model and image
@@ -47,27 +31,22 @@ a good demonstration of a model trained to recognize 1,000 different objects.
 
 ```
 # Get model
-curl https://storage.googleapis.com/download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_1.0_224.tgz | tar xzv -C /tmp
-
-# Get labels
-curl https://storage.googleapis.com/download.tensorflow.org/models/mobilenet_v1_1.0_224_frozen.tgz  | tar xzv -C /tmp  mobilenet_v1_1.0_224/labels.txt
-
-mv /tmp/mobilenet_v1_1.0_224/labels.txt /tmp/
+curl https://storage.googleapis.com/download.tensorflow.org/models/tflite_11_05_08/mobilenet_v2_1.0_224_quant.tgz | tar xzv -C /tmp
 ```
 
 ## Run the sample
 
 ```
-bazel-bin/tensorflow/lite/examples/label_image/label_image \
-  --tflite_model /tmp/mobilenet_v1_1.0_224.tflite \
-  --labels /tmp/labels.txt \
-  --image testdata/grace_hopper.bmp
+bazel-bin/label_image \
+  --tflite_model /tmp/mobilenet_v2_1.0_224_quant.tflite \
+  --labels data/labels.txt \
+  --image data/grace_hopper.bmp
 ```
 
 You should see results like this:
 
 ```
-Loaded model /tmp/mobilenet_v1_1.0_224.tflite
+Loaded model /tmp/mobilenet_v2_1.0_224_quant.tflite
 resolved reporter
 invoked
 average time: 68.12 ms

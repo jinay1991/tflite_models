@@ -1,12 +1,10 @@
-# Description:
-# TensorFlow Lite Example Label Image.
-
 load("@org_tensorflow//tensorflow/lite:build_def.bzl", "tflite_linkopts")
 
 package(default_visibility = ["//visibility:public"])
 
 exports_files(glob([
     "data/*.bmp",
+    "data/*.txt",
 ]))
 
 cc_library(
@@ -49,6 +47,7 @@ cc_binary(
         "data/labels.txt",
         "@mobilenet_v2_1.0_224_quant//:tflite",
     ],
+    linkstatic = True,
     deps = [
         ":label_image_helpers",
     ],
