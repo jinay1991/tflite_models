@@ -17,6 +17,7 @@ limitations under the License.
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <algorithm>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -317,19 +318,24 @@ void RunInference(Settings* s)
     }
 
     ///-------------------
-    auto tensor = interpreter->tensor(1);
     const auto dirname = "intermediate_layers";
-    if (!std::experimental::filesystem::create_directory(dirname))
+    if (!std::experimental::filesystem::exists(dirname))
     {
-        LOG(FATAL) << "Unable to create directory\n";
-        exit(-1);
+        if (!std::experimental::filesystem::create_directory(dirname))
+        {
+            LOG(FATAL) << "Unable to create directory\n";
+            exit(-1);
+        }
     }
-    for (auto idx = 0U; idx < interpreter->tensors_size(); idx++)
+    for (auto idx = 0U; idx < interpreter->tensors_size() - 1; idx++)
     {
+        auto tensor = interpreter->tensor(idx);
+        auto tensor_name = std::string{tensor->name};
+        std::replace(tensor_name.begin(), tensor_name.end(), '/', '_');
         std::stringstream filename;
-        filename << dirname << "/" << idx << ".txt";
-        std::ofstream f(filename.str());
-        f.write(interpreter->tensor(idx)->data.raw_const, interpreter->tensor(idx)->bytes);
+        filename << dirname << "/" << std::setw(3) << std::setfill('0') << idx << "_" << tensor_name << ".txt";
+        std::ofstream f(filename.str(), std::ios::binary);
+        f.write(tensor->data.raw_const, tensor->bytes);
     }
     ///-------------------
 
@@ -359,7 +365,10 @@ void RunInference(Settings* s)
     std::vector<string> labels;
     size_t label_count;
 
-    if (ReadLabelsFile(s->labels_file_name, &labels, &label_count) != kTfLiteOk) exit(-1);
+    if (ReadLabelsFile(s->labels_file_name, &labels, &label_count) != kTfLiteOk)
+    {
+        exit(-1);
+    }
 
     for (const auto& result : top_results)
     {
