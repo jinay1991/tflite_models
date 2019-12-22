@@ -7,6 +7,9 @@ bazel-*
 # vscode files
 .vscode
 
+# Models 
+model/
+
 # Prerequisites
 *.d
 
