@@ -13,19 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef LABEL_IMAGE_GET_TOP_N_IMPL_H_
-#define LABEL_IMAGE_GET_TOP_N_IMPL_H_
+#ifndef PERCEPTION_GET_TOP_N_IMPL_H_
+#define PERCEPTION_GET_TOP_N_IMPL_H_
 
 #include <algorithm>
 #include <functional>
 #include <queue>
 
-namespace tflite
+namespace perception
 {
-namespace label_image
-{
-extern bool input_floating;
-
 // Returns the top N confidence values over threshold in the provided vector,
 // sorted by confidence in descending order.
 template <class T>
@@ -69,7 +65,6 @@ void get_top_n(T* prediction, int prediction_size, size_t num_results, float thr
     std::reverse(top_results->begin(), top_results->end());
 }
 
-}  // namespace label_image
-}  // namespace tflite
+}  // namespace perception
 
-#endif  // LABEL_IMAGE_GET_TOP_N_IMPL_H_
+#endif  // PERCEPTION_GET_TOP_N_IMPL_H_

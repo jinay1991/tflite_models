@@ -1,13 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-new_git_repository(
-    name = "googletest",
-    build_file = "//third_party:gtest.BUILD",
-    remote = "https://github.com/google/googletest",
-    tag = "release-1.8.1",
-)
-
 http_archive(
     name = "mobilenet_v2_1.0_224_quant",
     build_file = "//third_party:models.BUILD",
