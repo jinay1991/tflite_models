@@ -67,7 +67,7 @@ code-coverage:
     - bazel coverage -s --combined_report=lcov --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main //...
     - export OUTPUT_DIR=$(bazel info execution_root)
     - export COVERAGE_INFO=$(find $OUTPUT_DIR -name coverage.dat)
-    - genhtml -s --num-spaces 4 --legend --highlight --sort -t "Motion Planning Code Coverage" --demangle-cpp --function-coverage --branch-coverage -o coverage $COVERAGE_INFO
+    - genhtml -s --num-spaces 4 --legend --highlight --sort -t "Perception Code Coverage" --demangle-cpp --function-coverage --branch-coverage -o coverage $COVERAGE_INFO
   coverage: /functions.*:\s(\d+.\d+%)/
   artifacts:
     paths:

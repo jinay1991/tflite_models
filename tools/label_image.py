@@ -14,17 +14,13 @@
 # ==============================================================================
 """label_image for tflite."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import argparse
 
 import numpy as np
-
-from PIL import Image
-
 import tensorflow as tf  # TF2
+from PIL import Image
 
 
 def load_labels(filename):
@@ -85,22 +81,6 @@ if __name__ == '__main__':
 
     interpreter.invoke()
 
-    print()
-    print(intermediate_details)
-    print()
-    print(intermediate_details[1])
-    intermediate_data = interpreter.get_tensor(
-        intermediate_details[1]["index"])
-    print()
-    print(intermediate_data, "type: ", intermediate_data.dtype)
-    save_tensor("1", intermediate_data)
-    print()
-    print(len(intermediate_details))
-    print()
-    print(input_details)
-    print()
-    print(output_details)
-    print()
     output_data = interpreter.get_tensor(output_details[0]['index'])
     results = np.squeeze(output_data)
 
