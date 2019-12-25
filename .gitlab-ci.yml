@@ -41,8 +41,22 @@ bazel-build:
 
 bazel-test:
   stage: test
+  dependencies:
+    - bazel-build
   script:
     - bazel test //...
+
+smoke-test:
+  stage: test
+  dependencies:
+    - bazel-test
+  script: 
+    - bazel run //:label_image
+    - cp -R bazel-bin/label_image.runfiles/__main__/intermediate_layers .
+  artifacts:
+    paths:
+      - intermediate_layers
+    expire_in: 7 days
 
 # -----------
 # Stage: Test

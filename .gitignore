@@ -9,6 +9,9 @@ bazel-*
 
 # Models 
 model/
+*.tflite
+*.pb
+intermediate_layers_py/
 
 # Prerequisites
 *.d
