@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 #include <experimental/filesystem>
 
@@ -44,6 +45,20 @@ void PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, std::uint32_t 
               << tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code))
               << "\n";
 }
+inline std::ostream& operator<<(std::ostream& os, const TfLiteIntArray* v)
+{
+    if (!v)
+    {
+        os << " (null)";
+        return os;
+    }
+    for (int k = 0; k < v->size; k++)
+    {
+        os << " " << std::dec << v->data[k];
+    }
+    return os;
+}
+
 }  // namespace
 
 InferenceEngine::InferenceEngine(const CLIOptions& cli_opts)
@@ -124,48 +139,10 @@ void InferenceEngine::Init()
 
 void InferenceEngine::ExecuteStep(const std::string& image_path)
 {
-    // ------------------------
-    // Part (1): Read Image
-    // ------------------------
     auto in = image_helper_->ReadImage(image_path, &image_width_, &image_height_, &image_channels_);
 
-    std::int32_t input = interpreter_->inputs()[0];
-    if (verbose_)
-    {
-        LOG(INFO) << "input: " << input << "\n";
-    }
+    SetInputData(in);
 
-    // ------------------------------
-    // Part (2): Prepare Input Tensor
-    // ------------------------------
-    // get input dimension from the input tensor metadata
-    // assuming one input only
-    TfLiteIntArray* dims = interpreter_->tensor(input)->dims;
-    std::int32_t wanted_height = dims->data[1];
-    std::int32_t wanted_width = dims->data[2];
-    std::int32_t wanted_channels = dims->data[3];
-
-    switch (interpreter_->tensor(input)->type)
-    {
-        case TfLiteType::kTfLiteFloat32:
-            cli_opts_.input_floating = true;
-            ResizeImage<float>(interpreter_->typed_tensor<float>(input), in.data(), image_height_, image_width_,
-                               image_channels_, wanted_height, wanted_width, wanted_channels, cli_opts_.input_floating,
-                               cli_opts_.input_mean, cli_opts_.input_std);
-            break;
-        case TfLiteType::kTfLiteUInt8:
-            ResizeImage<std::uint8_t>(interpreter_->typed_tensor<std::uint8_t>(input), in.data(), image_height_,
-                                      image_width_, image_channels_, wanted_height, wanted_width, wanted_channels,
-                                      cli_opts_.input_floating, cli_opts_.input_mean, cli_opts_.input_std);
-            break;
-        default:
-            throw std::runtime_error("cannot handle input type " + std::to_string(interpreter_->tensor(input)->type) +
-                                     " yet");
-    }
-
-    // ----------------------
-    // Part (3): Set Profiler
-    // ----------------------
     auto profiler = absl::make_unique<tflite::profiling::Profiler>(cli_opts_.max_profiling_buffer_entries);
     interpreter_->SetProfiler(profiler.get());
 
@@ -174,37 +151,20 @@ void InferenceEngine::ExecuteStep(const std::string& image_path)
         profiler->StartProfiling();
     }
 
-    // ------------------------------
-    // Part (4): Run Inference Engine
-    // ------------------------------
-    if (cli_opts_.loop_count > 1)
+    struct timeval start_time;
+    struct timeval stop_time;
+    gettimeofday(&start_time, nullptr);
+
+    if (interpreter_->Invoke() != kTfLiteOk)
     {
-        for (std::int32_t i = 0; i < cli_opts_.number_of_warmup_runs; i++)
-        {
-            if (interpreter_->Invoke() != kTfLiteOk)
-            {
-                LOG(FATAL) << "Failed to invoke tflite!\n";
-            }
-        }
+        LOG(FATAL) << "Failed to invoke tflite!\n";
     }
 
-    struct timeval start_time, stop_time;
-    gettimeofday(&start_time, nullptr);
-    for (std::int32_t i = 0; i < cli_opts_.loop_count; i++)
-    {
-        if (interpreter_->Invoke() != kTfLiteOk)
-        {
-            LOG(FATAL) << "Failed to invoke tflite!\n";
-        }
-    }
     gettimeofday(&stop_time, nullptr);
     LOG(INFO) << "invoked \n";
     LOG(INFO) << "average time: " << (get_us(stop_time) - get_us(start_time)) / (cli_opts_.loop_count * 1000)
               << " ms \n";
 
-    // -----------------------
-    // Part (5): Stop Profiler
-    // -----------------------
     if (cli_opts_.profiling)
     {
         profiler->StopProfiling();
@@ -217,40 +177,73 @@ void InferenceEngine::ExecuteStep(const std::string& image_path)
             PrintProfilingInfo(profile_events[i], op_index, registration);
         }
     }
-    // ------------------------
-    // Part (6): Collect Result
-    // ------------------------
+
     SaveIntermediateResults();
 
-    // ------------------------
-    // Part (7): Collect Result
-    // ------------------------
-    const float threshold = 0.001f;
+    const auto results = GetResults();
 
-    std::vector<std::pair<float, std::int32_t>> top_results;
+    PrintResults(results);
+}
 
-    std::int32_t output = interpreter_->outputs()[0];
-    TfLiteIntArray* output_dims = interpreter_->tensor(output)->dims;
-    // assume output dims to be something like (1, 1, ... ,size)
-    auto output_size = output_dims->data[output_dims->size - 1];
-    switch (interpreter_->tensor(output)->type)
+void InferenceEngine::Shutdown() {}
+
+void InferenceEngine::SetInputData(std::vector<std::uint8_t> in)
+{
+    const auto input = interpreter_->inputs()[0];
+
+    // get input dimension from the input tensor metadata
+    // assuming one input only
+    TfLiteIntArray* dims = interpreter_->tensor(input)->dims;
+    std::int32_t wanted_height = dims->data[1];
+    std::int32_t wanted_width = dims->data[2];
+    std::int32_t wanted_channels = dims->data[3];
+
+    switch (interpreter_->tensor(input)->type)
     {
         case kTfLiteFloat32:
+            cli_opts_.input_floating = true;
+            ResizeImage<float>(interpreter_->typed_tensor<float>(input), in.data(), image_height_, image_width_,
+                               image_channels_, wanted_height, wanted_width, wanted_channels, cli_opts_.input_floating,
+                               cli_opts_.input_mean, cli_opts_.input_std);
+            break;
+        case kTfLiteUInt8:
+            ResizeImage<std::uint8_t>(interpreter_->typed_tensor<std::uint8_t>(input), in.data(), image_height_,
+                                      image_width_, image_channels_, wanted_height, wanted_width, wanted_channels,
+                                      cli_opts_.input_floating, cli_opts_.input_mean, cli_opts_.input_std);
+            break;
+        default:
+            throw std::runtime_error("cannot handle input type " + std::to_string(interpreter_->tensor(input)->type) +
+                                     " yet");
+    }
+}
+std::vector<std::pair<float, std::int32_t>> InferenceEngine::GetResults() const
+{
+    std::vector<std::pair<float, std::int32_t>> top_results;
+    const float threshold = 0.001f;
+
+    const auto output = interpreter_->outputs()[0];
+    const auto output_dims = interpreter_->tensor(output)->dims;
+    // assume output dims to be something like (1, 1, ... ,size)
+    const auto output_size = output_dims->data[output_dims->size - 1];
+    switch (interpreter_->tensor(output)->type)
+    {
+        case TfLiteType::kTfLiteFloat32:
             get_top_n<float>(interpreter_->typed_output_tensor<float>(0), output_size, cli_opts_.number_of_results,
                              threshold, &top_results, true);
             break;
-        case kTfLiteUInt8:
+        case TfLiteType::kTfLiteUInt8:
             get_top_n<std::uint8_t>(interpreter_->typed_output_tensor<std::uint8_t>(0), output_size,
                                     cli_opts_.number_of_results, threshold, &top_results, false);
             break;
         default:
-            throw std::runtime_error("cannot handle output type " + std::to_string(interpreter_->tensor(input)->type) +
+            throw std::runtime_error("cannot handle output type " + std::to_string(interpreter_->tensor(output)->type) +
                                      " yet");
     }
+    return top_results;
+}
 
-    // -----------------------
-    // Part (8): Map to Labels
-    // -----------------------
+void InferenceEngine::PrintResults(std::vector<std::pair<float, std::int32_t>> top_results)
+{
     std::vector<std::string> labels;
     size_t label_count;
 
@@ -260,12 +253,9 @@ void InferenceEngine::ExecuteStep(const std::string& image_path)
     {
         const float confidence = result.first;
         const std::int32_t index = result.second;
-        LOG(INFO) << confidence << ": " << index << " " << labels[index] << "\n";
+        LOG(INFO) << confidence << ": " << labels[index] << "\n";
     }
 }
-
-void InferenceEngine::Shutdown() {}
-
 // Takes a file name, and loads a list of labels from it, one per line, and
 // returns a vector of the strings. It pads with empty strings so the length
 // of the result is a multiple of 16, because our model expects that.
@@ -301,15 +291,32 @@ void InferenceEngine::SaveIntermediateResults()
             throw std::runtime_error("Unable to create directory\n");
         }
     }
+
     for (auto idx = 0U; idx < interpreter_->tensors_size() - 1; idx++)
     {
         auto tensor = interpreter_->tensor(idx);
+        if (tensor->type != TfLiteType::kTfLiteUInt8 && tensor->allocation_type == TfLiteAllocationType::kTfLiteMmapRo)
+        {
+            continue;
+        }
         auto tensor_name = std::string{tensor->name};
         std::replace(tensor_name.begin(), tensor_name.end(), '/', '_');
+
         std::stringstream filename;
-        filename << dirname << "/" << std::setw(3) << std::setfill('0') << idx << "_" << tensor_name << ".txt";
+        filename << dirname << "/" << std::setw(3) << std::setfill('0') << idx << "_" << tensor_name << "_tensor.txt";
+
+        auto tensor_dims = tensor->dims;
+        auto tensor_channels = tensor_dims->data[tensor_dims->size - 1];
+
         std::ofstream f(filename.str(), std::ios::binary);
-        f.write(tensor->data.raw_const, tensor->bytes);
+        for (auto b = 0U, ch = 0U; b < tensor->bytes; ++b, ++ch)
+        {
+            if (ch > tensor_channels - 1)
+            {
+                ch = 0;
+            }
+            f << +ch << " " << +static_cast<std::uint8_t>(tensor->data.raw_const[b]) << "\n";
+        }
     }
 }
 

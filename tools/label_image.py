@@ -21,6 +21,7 @@ import argparse
 import numpy as np
 import tensorflow as tf  # TF2
 from PIL import Image
+import os
 
 
 def load_labels(filename):
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-i',
         '--image',
-        default='/tmp/grace_hopper.bmp',
+        default='data/grace_hopper.bmp',
         help='image to be classified')
     parser.add_argument(
         '-m',
@@ -43,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-l',
         '--label_file',
-        default='/tmp/labels.txt',
+        default='data/labels.txt',
         help='name of file containing labels')
     parser.add_argument(
         '--input_mean',
@@ -80,6 +81,23 @@ if __name__ == '__main__':
     interpreter.set_tensor(input_details[0]['index'], input_data)
 
     interpreter.invoke()
+
+    # ------------------
+    dirname = "intermediate_layers_py"
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+
+    for tensor_detail in intermediate_details:
+        tensor_index = tensor_detail['index']
+        tensor_name = tensor_detail['name'].replace('/', '_')
+
+        tensor = interpreter.get_tensor(tensor_index)
+
+        tensor.tofile(
+            "{}/{}_{}_tensor.txt".format(dirname, tensor_index, tensor_name), sep="\n")
+
+    print("*** ********** ***")
+    # ------------------
 
     output_data = interpreter.get_tensor(output_details[0]['index'])
     results = np.squeeze(output_data)

@@ -32,18 +32,48 @@ cppcheck:
       - static_code_analysis.xml
       - static_code_analysis.log
     expire_in: 7 days
-    
+
+
+code_quality:
+  image: docker:stable
+  stage: check
+  variables:
+    DOCKER_DRIVER: overlay2
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+      --env SOURCE_CODE="$PWD"
+      --volume "$PWD":/code
+      --volume /var/run/docker.sock:/var/run/docker.sock
+      "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+
+# ------------
+# Stage: Build
+# ------------
 bazel-build:
-  image: registry.gitlab.com/jinay1991/tflite_models
   stage: build
   script:
     - bazel build //...
 
-bazel-test:
-  stage: test
+doxygen:
+  stage: build
   script:
-    - bazel test //...
-
+    - echo "Generating Doxygen Documentation"
+    - doxygen Doxyfile
+  artifacts:
+    paths:
+      - doc
+    expire_in: 1 day
+  only:
+    refs:
+      - master
+      
 # -----------
 # Stage: Test
 # -----------
@@ -76,37 +106,17 @@ code-coverage:
     when: on_success
     expire_in: 1 day
 
-doxygen:
+smoke-test:
   stage: test
-  script:
-    - echo "Generating Doxygen Documentation"
-    - doxygen Doxyfile
+  dependencies:
+    - bazel-build
+  script: 
+    - bazel run //:label_image
+    - cp -R bazel-bin/label_image.runfiles/__main__/intermediate_layers .
   artifacts:
     paths:
-      - doc
-    expire_in: 1 day
-  only:
-    refs:
-      - master
-
-code_quality:
-  image: docker:stable
-  stage: test
-  variables:
-    DOCKER_DRIVER: overlay2
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    - docker run
-      --env SOURCE_CODE="$PWD"
-      --volume "$PWD":/code
-      --volume /var/run/docker.sock:/var/run/docker.sock
-      "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
-  artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
+      - intermediate_layers
+    expire_in: 7 days
 
 # -------------
 # Stage: Deploy
