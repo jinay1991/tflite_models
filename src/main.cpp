@@ -13,7 +13,6 @@ int main(int argc, char** argv)
     {
         auto cli_opts = perception::ParseCommandLineOptions(argc, argv);
         auto perception_app = std::make_unique<perception::Perception>(cli_opts);
-        perception_app->SetInferenceType(perception::Perception::InferenceType::kClassification);
 
         perception_app->Init();
         perception_app->RunInference(cli_opts.input_bmp_name);

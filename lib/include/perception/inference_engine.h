@@ -33,8 +33,10 @@ class InferenceEngine : public IInferenceEngine
     virtual void Shutdown() override;
 
   private:
+    void SetInputData(std::vector<std::uint8_t> in);
+    std::vector<std::pair<float, std::int32_t>> GetResults() const;
+    void PrintResults(std::vector<std::pair<float, std::int32_t>> top_results);
     void ReadLabelsFile(const std::string& file_name, std::vector<std::string>* result, std::size_t* found_label_count);
-
     void SaveIntermediateResults();
 
     CLIOptions cli_opts_;
