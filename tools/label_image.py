@@ -54,6 +54,10 @@ if __name__ == '__main__':
         '--input_std',
         default=127.5, type=float,
         help='input standard deviation')
+    parser.add_argument(
+        '--save_tensor',
+        action="store_true",
+        help='save intermediate tensors')
     args = parser.parse_args()
 
     interpreter = tf.lite.Interpreter(model_path=args.model_file)
@@ -82,22 +86,20 @@ if __name__ == '__main__':
 
     interpreter.invoke()
 
-    # ------------------
-    dirname = "intermediate_layers_py"
-    if not os.path.exists(dirname):
-        os.mkdir(dirname)
+    if args.save_tensor:
+        dirname = "intermediate_layers_py"
+        if not os.path.exists(dirname):
+            os.mkdir(dirname)
 
-    for tensor_detail in intermediate_details:
-        tensor_index = tensor_detail['index']
-        tensor_name = tensor_detail['name'].replace('/', '_')
+        for tensor_detail in intermediate_details:
+            if tensor_detail['dtype'] != np.uint8:
+                continue
+            tensor_index = tensor_detail['index']
+            tensor_name = tensor_detail['name'].replace('/', '_')
+            tensor = interpreter.get_tensor(tensor_index)
 
-        tensor = interpreter.get_tensor(tensor_index)
-
-        tensor.tofile(
-            "{}/{}_{}_tensor.txt".format(dirname, tensor_index, tensor_name), sep="\n")
-
-    print("*** ********** ***")
-    # ------------------
+            tensor.tofile(
+                "{}/{}_{}_tensor.txt".format(dirname, tensor_index, tensor_name), sep="\n")
 
     output_data = interpreter.get_tensor(output_details[0]['index'])
     results = np.squeeze(output_data)

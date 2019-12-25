@@ -16,11 +16,12 @@ cc_library(
         "include/perception/utils/get_top_n.h",
         "include/perception/utils/get_top_n_impl.h",
         "include/perception/utils/i_image_helper.h",
-        "include/perception/utils/jpeg_helper.h",
+        "include/perception/utils/jpeg_decoder.h",
+        "include/perception/utils/jpeg_helper.h",  # TODO: Move to bazel WORKSPACE as it is third-party
         "include/perception/utils/resize.h",
         "include/perception/utils/resize_impl.h",
     ],
-    linkopts = select({
+    linkopts = ["-lm"] + select({
         ":darwin": [],
         "//conditions:default": ["-lstdc++fs"],
     }),
@@ -57,6 +58,7 @@ cc_library(
         ":cli",
         ":utils",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
         "@org_tensorflow//tensorflow/lite:builtin_op_data",
         "@org_tensorflow//tensorflow/lite:framework",
         "@org_tensorflow//tensorflow/lite:string",
