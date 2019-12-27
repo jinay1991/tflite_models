@@ -13,14 +13,27 @@ pip install future --user
 
 Note that, this repository uses `tensorflow` as bazel external dependency.
 
-## Build 
 
-First run `$TENSORFLOW_ROOT/configure`. 
+## Build 
 
 Build it for desktop machines (tested on Ubuntu and OS X):
 
 ```
-bazel build -c opt //:label_image
+bazel build -c opt --cxxopt="-std=c++14" //:label_image
+```
+
+## Tests
+
+To run unit tests first pull LFS filesystems
+
+```
+git lfs pull
+```
+
+Run unit tests
+
+```
+bazel test -c opt --cxxopt="-std=c++14" //...
 ```
 
 ## Download sample model and image
@@ -56,4 +69,45 @@ average time: 68.12 ms
 0.00608029: 543 543:drumstick
 ```
 
-See the `label_image.cc` source code for other command line options.
+See the `lib/src/cli.cpp` source code for other command line options.
+
+
+## On CentOS 7 or later
+
+Due to `libstdc++` dependencies `bazel` sometimes doesn't link to appropriate library hence it is advisiable to export variables as given below: 
+
+```
+export BAZEL_LINKOPTS=-static-libstdc++
+export BAZEL_LINKLIBS=-l%:libstdc++.a
+```
+
+Use `devtoolset-8` for compiling source with `bazel`. (Refer: `docker/centos/Dockerfile` for more details on dependencies on CentOS 7 or refer below section to configure manually.)
+
+### Prepare CentOS 7 Environment
+
+Install dependencies...
+
+```
+sudo yum install -y centos-release-scl
+sudo yum install -y devtoolset-8
+sudo yum install -y git wget 
+sudo yum install -y libtool clang-format-6.0
+sudo yum install -y epel-release
+sudo yum install -y python python-dev python-pip
+
+sudo python -m pip install -U pip 
+sudo python -m pip install -U future
+sudo python -m pip install -U tensorflow 
+
+wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo && sudo mv vbatts-bazel-epel-7.repo /etc/yum.repos.d
+sudo yum install -y bazel
+```
+
+Before running/compiling source, run following commands
+
+```
+scl enable devtoolset-8 bash
+
+export BAZEL_LINKOPTS=-static-libstdc++
+export BAZEL_LINKLIBS=-l%:libstdc++.a
+```

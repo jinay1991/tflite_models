@@ -11,6 +11,7 @@
 #include <experimental/filesystem>
 
 #include "absl/memory/memory.h"
+#include "absl/strings/match.h"
 #include "tensorflow/lite/core/api/profiler.h"
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/kernels/register.h"
@@ -21,6 +22,7 @@
 
 #include "perception/inference_engine.h"
 #include "perception/utils/bitmap_helper.h"
+#include "perception/utils/jpeg_helper.h"
 #include "perception/utils/resize.h"
 
 #define LOG(x) std::cerr
@@ -59,6 +61,50 @@ inline std::ostream& operator<<(std::ostream& os, const TfLiteIntArray* v)
     return os;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const TfLiteType& type)
+{
+    switch (type)
+    {
+        case kTfLiteFloat32:
+            os << "float32";
+            break;
+        case kTfLiteInt32:
+            os << "int32";
+            break;
+        case kTfLiteUInt8:
+            os << "uint8";
+            break;
+        case kTfLiteInt8:
+            os << "int8";
+            break;
+        case kTfLiteInt64:
+            os << "int64";
+            break;
+        case kTfLiteString:
+            os << "string";
+            break;
+        case kTfLiteBool:
+            os << "bool";
+            break;
+        case kTfLiteInt16:
+            os << "int16";
+            break;
+        case kTfLiteComplex64:
+            os << "complex64";
+            break;
+        case kTfLiteFloat16:
+            os << "float16";
+            break;
+        case kTfLiteNoType:
+            os << "no type";
+            break;
+        default:
+            os << "(invalid)";
+            break;
+    }
+    return os;
+}
+
 }  // namespace
 
 InferenceEngine::InferenceEngine(const CLIOptions& cli_opts)
@@ -68,8 +114,7 @@ InferenceEngine::InferenceEngine(const CLIOptions& cli_opts)
       verbose_{cli_opts.verbose},
       image_width_{224},
       image_height_{224},
-      image_channels_{3},
-      image_helper_{std::make_unique<BitmapImageHelper>()}
+      image_channels_{3}
 {
     if (!std::experimental::filesystem::exists(model_path_))
     {
@@ -112,6 +157,19 @@ InferenceEngine::InferenceEngine(const CLIOptions& cli_opts)
     if (cli_opts_.number_of_threads != -1)
     {
         interpreter_->SetNumThreads(cli_opts_.number_of_threads);
+    }
+
+    if (!std::experimental::filesystem::exists(cli_opts_.input_bmp_name))
+    {
+        throw std::runtime_error("Unable to locate " + cli_opts_.input_bmp_name);
+    }
+    if (absl::EndsWith(cli_opts_.input_bmp_name, ".bmp"))
+    {
+        image_helper_ = std::make_unique<BitmapImageHelper>();
+    }
+    else
+    {
+        image_helper_ = std::make_unique<JpegImageHelper>();
     }
 }
 
@@ -283,7 +341,7 @@ void InferenceEngine::ReadLabelsFile(const std::string& file_name, std::vector<s
 
 void InferenceEngine::SaveIntermediateResults()
 {
-    const auto dirname = "intermediate_layers";
+    const auto dirname = cli_opts_.save_results_directory;
     if (!std::experimental::filesystem::exists(dirname))
     {
         if (!std::experimental::filesystem::create_directory(dirname))
@@ -309,6 +367,12 @@ void InferenceEngine::SaveIntermediateResults()
         auto tensor_channels = tensor_dims->data[tensor_dims->size - 1];
 
         std::ofstream f(filename.str(), std::ios::binary);
+        f << "################################################################################\n"
+          << "# Tensor Details: {\n#   name: " << tensor->name << "\n#   shape: " << tensor->dims
+          << "\n#   index: " << idx << "\n#   type: " << tensor->type << "\n# }\n"
+          << "#\n"
+          << "# Note: Contents are formated as (channel_index, tensor_value) pair\n"
+          << "################################################################################\n";
         for (auto b = 0U, ch = 0U; b < tensor->bytes; ++b, ++ch)
         {
             if (ch > tensor_channels - 1)

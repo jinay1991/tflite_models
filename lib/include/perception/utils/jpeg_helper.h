@@ -25,7 +25,7 @@ class JpegImageHelper : public IImageHelper
     JpegImageHelper() = default;
     virtual ~JpegImageHelper() = default;
 
-    virtual std::vector<std::uint8_t> ReadImage(const std::string& input_bmp_name, std::int32_t* width,
+    virtual std::vector<std::uint8_t> ReadImage(const std::string& input_jpeg_name, std::int32_t* width,
                                                 std::int32_t* height, std::int32_t* channels) override;
 
   private:
