@@ -3,6 +3,7 @@
 /// @copyright Copyright (c) 2019. All Rights Reserved.
 ///
 #include <sys/time.h>
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -12,13 +13,6 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/match.h"
-#include "tensorflow/lite/core/api/profiler.h"
-#include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
-#include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/optional_debug_tools.h"
-#include "tensorflow/lite/profiling/profiler.h"
-#include "tensorflow/lite/string_util.h"
-#include "tensorflow/lite/tools/evaluation/utils.h"
 
 #include "perception/inference_engine.h"
 #include "perception/utils/bitmap_helper.h"
@@ -33,20 +27,6 @@ namespace
 {
 constexpr double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
 
-void PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, std::uint32_t op_index,
-                        TfLiteRegistration registration)
-{
-    // output something like
-    // time (ms) , Node xxx, OpCode xxx, symblic name
-    //      5.352, Node   5, OpCode   4, DEPTHWISE_CONV_2D
-
-    LOG(INFO) << std::fixed << std::setw(10) << std::setprecision(3)
-              << (e->end_timestamp_us - e->begin_timestamp_us) / 1000.0 << ", Node " << std::setw(3)
-              << std::setprecision(3) << op_index << ", OpCode " << std::setw(3) << std::setprecision(3)
-              << registration.builtin_code << ", "
-              << tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code))
-              << "\n";
-}
 inline std::ostream& operator<<(std::ostream& os, const TfLiteIntArray* v)
 {
     if (!v)
@@ -56,7 +36,7 @@ inline std::ostream& operator<<(std::ostream& os, const TfLiteIntArray* v)
     }
     for (int k = 0; k < v->size; k++)
     {
-        os << " " << std::dec << v->data[k];
+        os << " " << std::dec << std::setw(4) << v->data[k];
     }
     return os;
 }
@@ -227,12 +207,14 @@ void InferenceEngine::ExecuteStep(const std::string& image_path)
     {
         profiler->StopProfiling();
         auto profile_events = profiler->GetProfileEvents();
+        std::vector<std::int32_t> op_indices;
         for (std::int32_t i = 0; i < profile_events.size(); i++)
         {
             auto op_index = profile_events[i]->event_metadata;
             const auto node_and_registration = interpreter_->node_and_registration(op_index);
-            const TfLiteRegistration registration = node_and_registration->second;
-            PrintProfilingInfo(profile_events[i], op_index, registration);
+            const auto node = node_and_registration->first;
+            const auto registration = node_and_registration->second;
+            PrintProfilingInfo(profile_events[i], op_index, node, registration);
         }
     }
 
@@ -240,7 +222,7 @@ void InferenceEngine::ExecuteStep(const std::string& image_path)
 
     const auto results = GetResults();
 
-    PrintResults(results);
+    PrintOutput(results);
 }
 
 void InferenceEngine::Shutdown() {}
@@ -300,7 +282,28 @@ std::vector<std::pair<float, std::int32_t>> InferenceEngine::GetResults() const
     return top_results;
 }
 
-void InferenceEngine::PrintResults(std::vector<std::pair<float, std::int32_t>> top_results)
+void InferenceEngine::PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, const std::uint32_t op_index,
+                                         const TfLiteNode& node, const TfLiteRegistration& registration)
+{
+    // output something like
+    //  time (ms), Node xxx, OpCode xxx,      symblic name,    dimension,   type
+    //      5.352, Node   5, OpCode   4, DEPTHWISE_CONV_2D, [1 1 1 1280],  uint8
+    const auto tensor = interpreter_->tensor(node.outputs[0].data[0]);
+    static bool print_header = true;
+    if (print_header)
+    {
+        LOG(INFO) << " time (ms), Node xxx, OpCode xxx,         symblic name,              dimension,   type\n";
+        print_header = false;
+    }
+    LOG(INFO) << std::fixed << std::setw(10) << std::setprecision(3)
+              << (e->end_timestamp_us - e->begin_timestamp_us) / 1000.0 << ", Node " << std::setw(3)
+              << std::setprecision(3) << op_index << ", OpCode " << std::setw(3) << std::setprecision(3)
+              << registration.builtin_code << ", " << std::setw(20)
+              << tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code))
+              << ", [" << tensor->dims << "], " << std::setw(6) << tensor->type << "\n";
+}
+
+void InferenceEngine::PrintOutput(std::vector<std::pair<float, std::int32_t>> top_results)
 {
     std::vector<std::string> labels;
     size_t label_count;
@@ -350,18 +353,22 @@ void InferenceEngine::SaveIntermediateResults()
         }
     }
 
-    for (auto idx = 0U; idx < interpreter_->tensors_size() - 1; idx++)
+    for (auto op_index = 0; op_index < interpreter_->nodes_size(); op_index++)
     {
-        auto tensor = interpreter_->tensor(idx);
-        if (tensor->type != TfLiteType::kTfLiteUInt8 && tensor->allocation_type == TfLiteAllocationType::kTfLiteMmapRo)
-        {
-            continue;
-        }
-        auto tensor_name = std::string{tensor->name};
-        std::replace(tensor_name.begin(), tensor_name.end(), '/', '_');
+        const auto node_and_registration = interpreter_->node_and_registration(op_index);
+        const auto node = node_and_registration->first;
+        const auto registration = node_and_registration->second;
+        const auto tensor_index = node.outputs->data[0];
+        const auto tensor = interpreter_->tensor(tensor_index);
+        const auto op_code =
+            tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code));
 
         std::stringstream filename;
-        filename << dirname << "/" << std::setw(3) << std::setfill('0') << idx << "_" << tensor_name << "_tensor.txt";
+        std::string op_code_lower{op_code};
+        std::transform(op_code_lower.begin(), op_code_lower.end(), op_code_lower.begin(),
+                       [](const auto& c) { return std::tolower(c); });
+        filename << dirname << "/" << std::setw(3) << std::setfill('0') << op_index << "_" << op_code_lower
+                 << "_tensor.txt";
 
         auto tensor_dims = tensor->dims;
         auto tensor_channels = tensor_dims->data[tensor_dims->size - 1];
@@ -369,7 +376,9 @@ void InferenceEngine::SaveIntermediateResults()
         std::ofstream f(filename.str(), std::ios::binary);
         f << "################################################################################\n"
           << "# Tensor Details: {\n#   name: " << tensor->name << "\n#   shape: " << tensor->dims
-          << "\n#   index: " << idx << "\n#   type: " << tensor->type << "\n# }\n"
+          << "\n#   index: " << tensor_index << "\n#   type: " << tensor->type << "\n# }\n"
+          << "#\n"
+          << "# Layer Name (Op Code): " << op_code << "\n"
           << "#\n"
           << "# Note: Contents are formated as (channel_index, tensor_value) pair\n"
           << "################################################################################\n";

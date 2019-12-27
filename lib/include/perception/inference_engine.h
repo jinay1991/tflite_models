@@ -9,8 +9,15 @@
 #include <memory>
 #include <string>
 
-#include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/core/api/profiler.h"
+#include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/optional_debug_tools.h"
+#include "tensorflow/lite/string_util.h"
+#include "tensorflow/lite/tools/evaluation/utils.h"
+
+#define TFLITE_PROFILING_ENABLED
+#include "tensorflow/lite/profiling/profiler.h"
 
 #include "perception/cli.h"
 #include "perception/i_inference_engine.h"
@@ -35,7 +42,9 @@ class InferenceEngine : public IInferenceEngine
   private:
     void SetInputData(std::vector<std::uint8_t> in);
     std::vector<std::pair<float, std::int32_t>> GetResults() const;
-    void PrintResults(std::vector<std::pair<float, std::int32_t>> top_results);
+    void PrintOutput(std::vector<std::pair<float, std::int32_t>> top_results);
+    void PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, const std::uint32_t op_index,
+                            const TfLiteNode& node, const TfLiteRegistration& registration);
     void ReadLabelsFile(const std::string& file_name, std::vector<std::string>* result, std::size_t* found_label_count);
     void SaveIntermediateResults();
 
