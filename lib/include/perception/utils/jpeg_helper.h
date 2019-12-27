@@ -16,6 +16,7 @@
 #include "tensorflow/lite/string_util.h"
 
 #include "perception/utils/i_image_helper.h"
+#include "perception/utils/jpeg_decoder.h"
 
 namespace perception
 {
@@ -30,6 +31,8 @@ class JpegImageHelper : public IImageHelper
 
   private:
     virtual std::vector<std::uint8_t> DecodeImage(const std::uint8_t* input) const override;
+
+    std::unique_ptr<Jpeg::Decoder> jpeg_decoder_;
 };
 }  // namespace perception
 #endif  /// PERCEPTION_UTILS_JPEG_HELPER_H_
