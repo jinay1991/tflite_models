@@ -33,7 +33,6 @@ cppcheck:
       - static_code_analysis.log
     expire_in: 7 days
 
-
 code_quality:
   image: docker:stable
   stage: check
@@ -56,10 +55,36 @@ code_quality:
 # ------------
 # Stage: Build
 # ------------
-bazel-build:
+bazel-build-and-test:
   stage: build
   script:
     - bazel build //...
+    - bazel test //...  --test_output=all --cache_test_results=false --test_arg="--gtest_output=xml:/tmp/test_results.xml"
+  after_script:
+    - cp /tmp/test_results.xml test_results.xml
+  artifacts:
+    reports:
+      junit: test_results.xml
+    name: TestResults
+    when: on_success
+
+code-coverage:
+  stage: build
+  script:
+    - bazel coverage -s --combined_report=lcov --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main //...
+    - export OUTPUT_DIR=$(bazel info execution_root)
+    - export COVERAGE_INFO=$(find $OUTPUT_DIR -name coverage.dat)
+    - genhtml -s --num-spaces 4 --legend --highlight --sort -t "Code Coverage" --demangle-cpp --function-coverage --branch-coverage -o coverage $COVERAGE_INFO
+  coverage: /functions.*:\s(\d+.\d+%)/
+  artifacts:
+    paths:
+      - coverage/
+    name: code-coverage
+    when: on_success
+    expire_in: 1 day
+  only:
+    refs:
+      - master
 
 doxygen:
   stage: build
@@ -77,41 +102,10 @@ doxygen:
 # -----------
 # Stage: Test
 # -----------
-bazel-test:
-  stage: test
-  dependencies:
-    - bazel-build
-  script:
-    - bazel test //...  --test_output=all --cache_test_results=false --test_arg="--gtest_output=xml:/tmp/test_results.xml"
-  after_script:
-    - cp /tmp/test_results.xml test_results.xml
-  artifacts:
-    reports:
-      junit: test_results.xml
-    name: TestResults
-    when: on_success
-
-code-coverage:
-  stage: test
-  dependencies:
-    - bazel-build
-  script:
-    - bazel coverage -s --combined_report=lcov --coverage_report_generator=@bazel_tools//tools/test/CoverageOutputGenerator/java/com/google/devtools/coverageoutputgenerator:Main //...
-    - export OUTPUT_DIR=$(bazel info execution_root)
-    - export COVERAGE_INFO=$(find $OUTPUT_DIR -name coverage.dat)
-    - genhtml -s --num-spaces 4 --legend --highlight --sort -t "Code Coverage" --demangle-cpp --function-coverage --branch-coverage -o coverage $COVERAGE_INFO
-  coverage: /functions.*:\s(\d+.\d+%)/
-  artifacts:
-    paths:
-      - coverage/
-    name: code-coverage
-    when: on_success
-    expire_in: 1 day
-
 smoke-test:
   stage: test
   dependencies:
-    - bazel-build
+    - bazel-build-and-test
   script: 
     - bazel run //:label_image
     - cp -R bazel-bin/label_image.runfiles/__main__/intermediate_layers .
@@ -131,7 +125,7 @@ pages:
     - doxygen
   script:
     - mkdir -p reports
-    - echo "<!DOCTYPE html> <html> <head> <meta charset="utf-8"> <title>Motion Planning</title> </head> <body> <ul> <li><a href="coverage/">Code Coverage Report</a></li> <li><a href="static_code_analysis_report/">Static Code Analysis Report</a></li> <li><a href="doc/html">Doxygen Documentation</a></li> </ul> </body> </html>" > reports/index.html
+    - echo "<!DOCTYPE html> <html> <head> <meta charset="utf-8"> <title>Perception</title> </head> <body> <ul> <li><a href="coverage/">Code Coverage Report</a></li> <li><a href="static_code_analysis_report/">Static Code Analysis Report</a></li> <li><a href="doc/html">Doxygen Documentation</a></li> </ul> </body> </html>" > reports/index.html
     - mv coverage reports/coverage
     - mv static_code_analysis_report/ reports/static_code_analysis_report
     - mv doc/ reports/doc
