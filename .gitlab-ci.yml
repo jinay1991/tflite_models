@@ -67,8 +67,9 @@ bazel-build-and-test:
       junit: test_results.xml
     name: TestResults
     when: on_success
-  except: 
-    - wip
+  except:
+    variables:
+      - $CI_MERGE_REQUEST_TITLE =~ /WIP/
 
 code-coverage:
   stage: build
@@ -115,8 +116,10 @@ smoke-test:
     paths:
       - intermediate_layers
     expire_in: 7 days
-  except: 
-    - wip
+  except:
+    variables:
+      - $CI_MERGE_REQUEST_TITLE =~ /WIP/
+  
 
 # -------------
 # Stage: Deploy
