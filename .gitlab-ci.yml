@@ -67,6 +67,8 @@ bazel-build-and-test:
       junit: test_results.xml
     name: TestResults
     when: on_success
+  except: 
+    - wip
 
 code-coverage:
   stage: build
@@ -113,6 +115,8 @@ smoke-test:
     paths:
       - intermediate_layers
     expire_in: 7 days
+  except: 
+    - wip
 
 # -------------
 # Stage: Deploy
