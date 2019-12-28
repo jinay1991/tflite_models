@@ -1,45 +1,178 @@
 @startuml
+''' JPEG Lib Definitions '''
+namespace Jpeg {
+class Decoder {
+    
+}
+}
+
+''' Bitmap Lib Definitions '''
+namespace Bitmap {
+class Decoder {
+    
+}
+}
+
+''' TFLite Definitions '''
+namespace tflite {
+class FlatModelBuffer {
+
+}
+class Interpreter {
+}
+}
+
+' ''' TF Definitions '''
+' namespace tensorflow {
+' }
+
+' ''' Torch Definitions '''
+' namespace torch {
+' }
+
+namespace perception{ 
+''' Data Structures '''
+class CLIOptions << (S,#FF7700) >> {
+}
 
 ''' Interfaces '''
+interface IArgumentParser {
+    + {abstract} ParseArgs(): CLIOptions
+    + {abstract} AddArgument(): void
+}
+
 interface IInferenceEngine {
-    + void Init()
-    + void ExecuteStep()
-    + void Shutdown()
+    + {abstract} Init(): void
+    + {abstract} Execute(): void
+    + {abstract} Shutdown(): void
 }
 
 interface IImageHelper {
-
+    + {abstract} ReadImage(): uint8_t[]
+    + {abstract} ResizeImage(): uint8_t[]
+    + {abstract} GetImageWidth(): int32_t
+    + {abstract} GetImageHeight(): int32_t
+    + {abstract} GetImageChannels(): int32_t
+    - {abstract} DecodeImage(): uint8_t[]
 }
 
 ''' Interface Implementation '''
-class CLIOptions {
+abstract ArgumentParserBase{
+    # args: CLIOptions
+    # AddArgument(): void
+}
 
+class LinuxArgumentParser {
+    + ParseArgs(int argc, char** argv): CLIOptions
+}
+
+' class WindowsArgumentParser {
+'     + ParseArgs(int argc, char** argv): CLIOptions
+' }
+
+class ImageHelperBase {
+    # width: int32_t
+    # height: int32_t
+    # channels: int32_t
+    + GetImageWidth(): int32_t
+    + GetImageHeight(): int32_t
+    + GetImageChannels(): int32_t
 }
 
 class JpegImageHelper {
-
+    + ReadImage(): uint8_t[]
+    + ResizeImage(): uint8_t[]
+    - DecodeImage(): uint8_t[]
+    - decoder: Decoder
 }
 
 class BitmapImageHelper {
-
+    + ReadImage(): uint8_t[]
+    + ResizeImage(): uint8_t[]
+    - DecodeImage(): uint8_t[]
+    - decoder: Decoder
 }
 
-class InferenceEngine {
-
+enum InferenceEngineType {
+    kInvalid
+    kTFLiteInferenceEngine
+    ' kTFInferenceEngine
+    ' kTorchInferenceEngine
 }
+
+abstract InferenceEngineBase {
+    # image_path: string
+    # model_path: string
+    # label_path: string
+    # image_helper: IImageHelper
+    # results: string[]
+    + SelectInferenceEngine(): void
+    + GetLabelList(): string[]
+    + GetImageData(): uint8_t[]
+    + GetImageWidth(): int32_t
+    + GetImageHeight(): int32_t
+    + GetImageChannels(): int32_t
+    + GetResults(top_k): string[]
+    - GetTopKResults(): string[]
+}
+
+class TFLiteInferenceEngine {
+    - model: FlatModelBuffer
+    - interpreter: Interpreter
+    + Init(): void
+    + Execute(): void
+    + Shutdown(): void
+}
+
+' class TFInferenceEngine {
+'     + Init(): void
+'     + Shutdown(): void
+'     + Execute(): void
+' }
+
+' class TorchInferenceEngine {
+'     + Init(): void
+'     + Shutdown(): void
+'     + Execute(): void
+' }
 
 class Perception {
-
+    - args: IArgumentParser
+    - inference_engine: IInferenceEngine
+    - RunFor(count): void
+    + Init(): void
+    + Execute(): void
+    + Shutdown(): void
 }
 
 ''' Relation '''
-IImageHelper <|-down- JpegImageHelper  
-IImageHelper <|-down- BitmapImageHelper
+IArgumentParser <|-down- ArgumentParserBase
+ArgumentParserBase *-right- CLIOptions
+ArgumentParserBase <|-down- LinuxArgumentParser
+' ArgumentParserBase <|-down- WindowsArgumentParser
 
-IInferenceEngine <|-down- InferenceEngine
-IImageHelper <|.left. InferenceEngine
+IImageHelper <|-down- ImageHelperBase
+ImageHelperBase <|-down- JpegImageHelper
+ImageHelperBase <|-down- BitmapImageHelper
 
-Perception <|.. IInferenceEngine
-Perception <|.. CLIOptions
+JpegImageHelper *-down- Jpeg.Decoder
+BitmapImageHelper *-down- Bitmap.Decoder 
 
+IInferenceEngine <|-down- InferenceEngineBase
+
+InferenceEngineBase -right- InferenceEngineType
+InferenceEngineBase *-left- IImageHelper
+InferenceEngineBase <|-- TFLiteInferenceEngine
+' InferenceEngineBase <|-- TFInferenceEngine
+' InferenceEngineBase <|-- TorchInferenceEngine
+
+' TFInferenceEngine *-down- tensorflow
+' TorchInferenceEngine *-down- torch
+
+TFLiteInferenceEngine *-right- tflite.FlatModelBuffer
+TFLiteInferenceEngine *-down- tflite.Interpreter
+
+Perception *-- IInferenceEngine
+Perception *-- IArgumentParser
+}
 @enduml
