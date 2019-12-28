@@ -1,0 +1,45 @@
+@startuml
+
+''' Interfaces '''
+interface IInferenceEngine {
+    + void Init()
+    + void ExecuteStep()
+    + void Shutdown()
+}
+
+interface IImageHelper {
+
+}
+
+''' Interface Implementation '''
+class CLIOptions {
+
+}
+
+class JpegImageHelper {
+
+}
+
+class BitmapImageHelper {
+
+}
+
+class InferenceEngine {
+
+}
+
+class Perception {
+
+}
+
+''' Relation '''
+IImageHelper <|-down- JpegImageHelper  
+IImageHelper <|-down- BitmapImageHelper
+
+IInferenceEngine <|-down- InferenceEngine
+IImageHelper <|.left. InferenceEngine
+
+Perception <|.. IInferenceEngine
+Perception <|.. CLIOptions
+
+@enduml
