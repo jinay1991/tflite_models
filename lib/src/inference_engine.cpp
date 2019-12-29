@@ -353,21 +353,14 @@ void InferenceEngine::SaveIntermediateResults()
         }
     }
 
-    for (auto op_index = 0; op_index < interpreter_->nodes_size(); op_index++)
+    for (auto tensor_index = 0; tensor_index < interpreter_->tensors_size() - 1; tensor_index++)
     {
-        const auto node_and_registration = interpreter_->node_and_registration(op_index);
-        const auto node = node_and_registration->first;
-        const auto registration = node_and_registration->second;
-        const auto tensor_index = node.outputs->data[0];
         const auto tensor = interpreter_->tensor(tensor_index);
-        const auto op_code =
-            tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code));
+        auto tensor_name = std::string{tensor->name};
+        std::replace(tensor_name.begin(), tensor_name.end(), '/', '_');
 
         std::stringstream filename;
-        std::string op_code_lower{op_code};
-        std::transform(op_code_lower.begin(), op_code_lower.end(), op_code_lower.begin(),
-                       [](const auto& c) { return std::tolower(c); });
-        filename << dirname << "/" << std::setw(3) << std::setfill('0') << op_index << "_" << op_code_lower
+        filename << dirname << "/" << std::setw(3) << std::setfill('0') << tensor_index << "_" << tensor_name
                  << "_tensor.txt";
 
         auto tensor_dims = tensor->dims;
@@ -377,8 +370,6 @@ void InferenceEngine::SaveIntermediateResults()
         f << "################################################################################\n"
           << "# Tensor Details: {\n#   name: " << tensor->name << "\n#   shape: " << tensor->dims
           << "\n#   index: " << tensor_index << "\n#   type: " << tensor->type << "\n# }\n"
-          << "#\n"
-          << "# Layer Name (Op Code): " << op_code << "\n"
           << "#\n"
           << "# Note: Contents are formated as (channel_index, tensor_value) pair\n"
           << "################################################################################\n";
