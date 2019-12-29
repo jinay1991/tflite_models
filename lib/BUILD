@@ -7,55 +7,38 @@ config_setting(
 
 cc_library(
     name = "utils",
-    srcs = [
-        "src/utils/bitmap_helper.cpp",
-        "src/utils/jpeg_helper.cpp",
-    ],
-    hdrs = [
-        "include/perception/utils/bitmap_helper.h",
-        "include/perception/utils/get_top_n.h",
-        "include/perception/utils/get_top_n_impl.h",
-        "include/perception/utils/i_image_helper.h",
-        "include/perception/utils/jpeg_decoder.h",
-        "include/perception/utils/jpeg_helper.h",  # TODO: Move to bazel WORKSPACE as it is third-party
-        "include/perception/utils/resize.h",
-        "include/perception/utils/resize_impl.h",
-    ],
-    linkopts = ["-lm"] + select({
-        ":darwin": [],
-        "//conditions:default": ["-lstdc++fs"],
-    }),
-    strip_include_prefix = "include",
-    deps = [
-        "@org_tensorflow//tensorflow/lite:framework",
-        "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
-    ],
-)
-
-cc_library(
-    name = "cli",
-    srcs = ["src/cli.cpp"],
-    hdrs = ["include/perception/cli.h"],
-    strip_include_prefix = "include",
-    deps = [
-        "@org_tensorflow//tensorflow/lite:framework",
-    ],
-)
-
-cc_library(
-    name = "inference_engine",
-    srcs = ["src/inference_engine.cpp"],
-    hdrs = [
-        "include/perception/i_inference_engine.h",
-        "include/perception/inference_engine.h",
-    ],
+    srcs = glob(["src/utils/*.cpp"]),
+    hdrs = glob(["include/perception/utils/*.h"]),
     linkopts = select({
         ":darwin": [],
         "//conditions:default": ["-lstdc++fs"],
     }),
     strip_include_prefix = "include",
     deps = [
-        ":cli",
+        # TODO: Remove dependencies from TensorFlow
+        "@org_tensorflow//tensorflow/lite:framework",
+        "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
+    ],
+)
+
+cc_library(
+    name = "argument_parser",
+    srcs = glob(["src/argument_parser/*.cpp"]),
+    hdrs = glob(["include/perception/argument_parser/*.h"]),
+    strip_include_prefix = "include",
+)
+
+cc_library(
+    name = "inference_engine",
+    srcs = glob(["src/inference_engine/*.cpp"]),
+    hdrs = glob(["include/perception/inference_engine/*.h"]),
+    linkopts = select({
+        ":darwin": [],
+        "//conditions:default": ["-lstdc++fs"],
+    }),
+    strip_include_prefix = "include",
+    deps = [
+        ":argument_parser",
         ":utils",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -76,17 +59,17 @@ cc_library(
     hdrs = ["include/perception/perception.h"],
     strip_include_prefix = "include",
     deps = [
+        ":argument_parser",
         ":inference_engine",
     ],
 )
 
 cc_test(
-    name = "perception_test",
-    srcs = glob([
-        "test/*.cpp",
-    ]),
+    name = "perception_tests",
+    srcs = glob(["test/*.cpp"]),
     data = [
         "//:testdata",
+        "@mobilenet_v2_1.0_224_quant//:tflite",
     ],
     deps = [
         ":perception",

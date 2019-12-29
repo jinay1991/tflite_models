@@ -1,6 +1,6 @@
 ///
 /// @file
-/// @copyright Copyright (c) 2019. All Rights Reserved.
+/// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_UTILS_JPEG_HELPER_H_
 #define PERCEPTION_UTILS_JPEG_HELPER_H_

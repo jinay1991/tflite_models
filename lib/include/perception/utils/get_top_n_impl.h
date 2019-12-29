@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef PERCEPTION_GET_TOP_N_IMPL_H_
-#define PERCEPTION_GET_TOP_N_IMPL_H_
+#ifndef PERCEPTION_UTILS_GET_TOP_N_IMPL_H_
+#define PERCEPTION_UTILS_GET_TOP_N_IMPL_H_
 
 #include <algorithm>
 #include <functional>
@@ -67,4 +67,4 @@ void get_top_n(T* prediction, int prediction_size, size_t num_results, float thr
 
 }  // namespace perception
 
-#endif  // PERCEPTION_GET_TOP_N_IMPL_H_
+#endif  // PERCEPTION_UTILS_GET_TOP_N_IMPL_H_
