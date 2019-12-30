@@ -25,6 +25,10 @@ cc_library(
     name = "argument_parser",
     srcs = glob(["src/argument_parser/*.cpp"]),
     hdrs = glob(["include/perception/argument_parser/*.h"]),
+    copts = [
+        "-Wall",
+        "-Werror",
+    ],
     strip_include_prefix = "include",
 )
 
@@ -32,6 +36,10 @@ cc_library(
     name = "inference_engine",
     srcs = glob(["src/inference_engine/*.cpp"]),
     hdrs = glob(["include/perception/inference_engine/*.h"]),
+    copts = [
+        "-Wall",
+        "-Werror",
+    ],
     linkopts = select({
         ":darwin": [],
         "//conditions:default": ["-lstdc++fs"],
@@ -57,6 +65,10 @@ cc_library(
     name = "perception",
     srcs = ["src/perception.cpp"],
     hdrs = ["include/perception/perception.h"],
+    copts = [
+        "-Wall",
+        "-Werror",
+    ],
     strip_include_prefix = "include",
     deps = [
         ":argument_parser",

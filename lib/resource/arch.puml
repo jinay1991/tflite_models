@@ -95,11 +95,8 @@ abstract InferenceEngineBase {
     # GetImageChannels(): int32_t
     # GetImageData(): uint8_t[]
     # GetImageHeight(): int32_t
-    # GetImagePath(): int32_t
     # GetImageWidth(): int32_t
-    # GetLabelCount(): int32_t
     # GetLabelList(): string[]
-    # GetLabelPath(): int32_t
     # GetMaxProfilingBufferEntries(): int32_t
     # GetModelPath(): int32_t
     # GetNumberOfThreads(): int32_t

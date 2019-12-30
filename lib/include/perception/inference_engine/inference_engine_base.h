@@ -20,20 +20,18 @@ namespace perception
 class InferenceEngineBase : public IInferenceEngine
 {
   public:
+    InferenceEngineBase();
     explicit InferenceEngineBase(const CLIOptions& cli_options);
-    virtual ~InferenceEngineBase() = default;
+    virtual ~InferenceEngineBase();
 
   protected:
     virtual std::vector<std::uint8_t> GetImageData();
-    virtual std::vector<std::string> GetLabelList();
+    virtual std::vector<std::string> GetLabelList() const;
 
-    virtual std::int32_t GetLabelCount() const;
     virtual std::int32_t GetImageWidth() const;
     virtual std::int32_t GetImageHeight() const;
     virtual std::int32_t GetImageChannels() const;
-    virtual std::string GetImagePath() const;
     virtual std::string GetModelPath() const;
-    virtual std::string GetLabelPath() const;
 
     virtual bool IsProfilingEnabled() const;
     virtual bool IsVerbosityEnabled() const;
@@ -46,13 +44,13 @@ class InferenceEngineBase : public IInferenceEngine
 
   private:
     CLIOptions cli_options_;
+    std::int32_t channels_;
+    std::int32_t height_;
     std::int32_t label_count_;
     std::int32_t width_;
-    std::int32_t height_;
-    std::int32_t channels_;
     std::string image_path_;
-    std::string model_path_;
     std::string label_path_;
+    std::string model_path_;
     std::unique_ptr<IImageHelper> image_helper_;
 };
 

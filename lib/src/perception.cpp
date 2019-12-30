@@ -13,6 +13,8 @@ Perception::Perception(std::unique_ptr<IArgumentParser> argument_parser) : argum
 {
 }
 
+Perception::~Perception() {}
+
 void Perception::SelectInferenceEngine(const InferenceEngineType& type)
 {
     switch (type)

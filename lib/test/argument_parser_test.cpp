@@ -31,6 +31,12 @@ TEST(ArgumentParserTest, DefaultConstructor)
     EXPECT_EQ(actual.model_name, "external/mobilenet_v2_1.0_224_quant/mobilenet_v2_1.0_224_quant.tflite");
     EXPECT_THAT(actual.result_directory, ::testing::Eq("intermediate_tensors"));
 }
+TEST(ArgumentParserTest, WhenHelpArgument)
+{
+    char* argv[] = {"label_image", "-h"};
+    int argc = sizeof(argv) / sizeof(char*);
+    EXPECT_EXIT(ArgumentParser(argc, argv), ::testing::ExitedWithCode(1), "");
+}
 
 TEST(ArgumentParserTest, ParameterizedConstructor)
 {

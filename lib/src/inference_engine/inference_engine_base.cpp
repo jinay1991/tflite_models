@@ -14,25 +14,27 @@
 #include "perception/utils/jpeg_helper.h"
 #include "perception/utils/resize.h"
 
-#define ASSERT_PATH_EXISTS(path)                                    \
-    do                                                              \
-    {                                                               \
-        if (!std::experimental::filesystem::exists(path))           \
-        {                                                           \
-            throw std::runtime_error(path + "does not exists!!\n"); \
-        }                                                           \
+#define ASSERT_PATH_EXISTS(path)                                     \
+    do                                                               \
+    {                                                                \
+        if (!std::experimental::filesystem::exists(path))            \
+        {                                                            \
+            throw std::runtime_error(path + " does not exists!!\n"); \
+        }                                                            \
     } while (0);
 
 namespace perception
 {
+InferenceEngineBase::InferenceEngineBase() : InferenceEngineBase{CLIOptions{}} {}
 InferenceEngineBase::InferenceEngineBase(const CLIOptions& cli_options)
     : cli_options_{cli_options},
-      image_path_{cli_options_.input_name},
-      model_path_{cli_options_.model_name},
-      label_path_{cli_options_.labels_name},
-      width_{224},
+      channels_{3},
       height_{224},
-      channels_{3}
+      label_count_{0},
+      width_{224},
+      image_path_{cli_options_.input_name},
+      label_path_{cli_options_.labels_name},
+      model_path_{cli_options_.model_name}
 {
     ASSERT_PATH_EXISTS(model_path_);
     ASSERT_PATH_EXISTS(image_path_);
@@ -48,7 +50,9 @@ InferenceEngineBase::InferenceEngineBase(const CLIOptions& cli_options)
     }
 }
 
-std::vector<std::string> InferenceEngineBase::GetLabelList()
+InferenceEngineBase::~InferenceEngineBase() {}
+
+std::vector<std::string> InferenceEngineBase::GetLabelList() const
 {
     std::vector<std::string> labels;
     std::ifstream file(label_path_);
@@ -64,7 +68,6 @@ std::vector<std::string> InferenceEngineBase::GetLabelList()
     }
     /// @note It pads with empty strings so the length
     /// of the result is a multiple of 16, because our model expects that.
-    label_count_ = labels.size();
     const std::int32_t padding = 16;
     while (labels.size() % padding)
     {
@@ -72,7 +75,6 @@ std::vector<std::string> InferenceEngineBase::GetLabelList()
     }
     return labels;
 }
-std::int32_t InferenceEngineBase::GetLabelCount() const { return label_count_; }
 
 std::vector<std::uint8_t> InferenceEngineBase::GetImageData()
 {
@@ -82,9 +84,7 @@ std::vector<std::uint8_t> InferenceEngineBase::GetImageData()
 std::int32_t InferenceEngineBase::GetImageWidth() const { return width_; }
 std::int32_t InferenceEngineBase::GetImageHeight() const { return height_; }
 std::int32_t InferenceEngineBase::GetImageChannels() const { return channels_; }
-std::string InferenceEngineBase::GetImagePath() const { return image_path_; }
 std::string InferenceEngineBase::GetModelPath() const { return model_path_; }
-std::string InferenceEngineBase::GetLabelPath() const { return label_path_; }
 
 bool InferenceEngineBase::IsProfilingEnabled() const { return cli_options_.profiling; }
 bool InferenceEngineBase::IsVerbosityEnabled() const { return cli_options_.verbose; }
