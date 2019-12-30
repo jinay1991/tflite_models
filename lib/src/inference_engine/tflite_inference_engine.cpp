@@ -134,8 +134,10 @@ inline std::ostream& operator<<(std::ostream& os, const TfLiteType& type)
 }
 
 }  // namespace
-
+TFLiteInferenceEngine::TFLiteInferenceEngine() {}
 TFLiteInferenceEngine::TFLiteInferenceEngine(const CLIOptions& cli_options) : InferenceEngineBase{cli_options} {}
+
+TFLiteInferenceEngine::~TFLiteInferenceEngine() {}
 
 void TFLiteInferenceEngine::Init()
 {
@@ -218,7 +220,7 @@ void TFLiteInferenceEngine::Execute()
         profiler->StopProfiling();
         auto profile_events = profiler->GetProfileEvents();
         std::vector<std::int32_t> op_indices;
-        for (std::int32_t i = 0; i < profile_events.size(); i++)
+        for (std::size_t i = 0; i < profile_events.size(); i++)
         {
             auto op_index = profile_events[i]->event_metadata;
             const auto node_and_registration = interpreter_->node_and_registration(op_index);
@@ -316,7 +318,7 @@ std::vector<std::pair<float, std::int32_t>> TFLiteInferenceEngine::GetResults() 
 std::vector<std::pair<std::string, std::string>> TFLiteInferenceEngine::GetIntermediateOutput() const
 {
     std::vector<std::pair<std::string, std::string>> intermediate_outputs;
-    for (auto tensor_index = 0; tensor_index < interpreter_->tensors_size() - 1; tensor_index++)
+    for (std::size_t tensor_index = 0; tensor_index < interpreter_->tensors_size() - 1; tensor_index++)
     {
         const auto tensor = interpreter_->tensor(tensor_index);
         const auto tensor_dims = tensor->dims;
@@ -334,7 +336,8 @@ std::vector<std::pair<std::string, std::string>> TFLiteInferenceEngine::GetInter
                       << "#\n"
                       << "# Note: Contents are formated as (channel_index, tensor_value) pair\n"
                       << "################################################################################\n";
-        for (auto b = 0U, ch = 0U; b < tensor->bytes; ++b, ++ch)
+        std::int32_t ch = 0;
+        for (auto b = 0U; b < tensor->bytes; ++b, ++ch)
         {
             if (ch > tensor_channels - 1)
             {

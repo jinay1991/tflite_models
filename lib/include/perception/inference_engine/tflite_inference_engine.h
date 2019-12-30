@@ -23,8 +23,9 @@ namespace perception
 class TFLiteInferenceEngine : public InferenceEngineBase
 {
   public:
+    TFLiteInferenceEngine();
     explicit TFLiteInferenceEngine(const CLIOptions& cli_options);
-    virtual ~TFLiteInferenceEngine() = default;
+    virtual ~TFLiteInferenceEngine();
 
     virtual void Init() override;
     virtual void Execute() override;

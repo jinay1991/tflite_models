@@ -30,6 +30,7 @@ void PrintUsage()
               << "\n";
 }
 }  // namespace
+ArgumentParser::ArgumentParser() : cli_options_{} {}
 
 ArgumentParser::ArgumentParser(int argc, char* argv[])
     : long_options_{{"count", required_argument, nullptr, 'c'},
@@ -49,6 +50,8 @@ ArgumentParser::ArgumentParser(int argc, char* argv[])
 {
     cli_options_ = ParseArgs(argc, argv);
 }
+
+ArgumentParser::~ArgumentParser() {}
 
 CLIOptions ArgumentParser::GetParsedArgs() const { return cli_options_; }
 
@@ -108,9 +111,8 @@ CLIOptions ArgumentParser::ParseArgs(int argc, char* argv[])
             case '?':
                 /* getopt_long already printed an error message. */
                 PrintUsage();
-                exit(-1);
             default:
-                exit(-1);
+                exit(1);
         }
     }
     return cli_options_;

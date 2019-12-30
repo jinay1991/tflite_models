@@ -18,9 +18,9 @@ namespace perception
 class ArgumentParser : public IArgumentParser
 {
   public:
-    ArgumentParser() = default;
+    ArgumentParser();
     explicit ArgumentParser(int argc, char* argv[]);
-    virtual ~ArgumentParser() = default;
+    virtual ~ArgumentParser();
 
     virtual CLIOptions GetParsedArgs() const override;
 

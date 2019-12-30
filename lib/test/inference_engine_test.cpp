@@ -15,34 +15,52 @@ namespace perception
 {
 namespace
 {
-class TFLiteInferenceEngineTestFixture : public ::testing::Test
+TEST(TFLiteInferenceEngineTest, WhenInitialized)
 {
-  public:
-    TFLiteInferenceEngineTestFixture() : cli_options_{}, unit_{cli_options_} {}
+    TFLiteInferenceEngine unit;
+    EXPECT_EQ(unit.model_.get(), nullptr);
+    EXPECT_EQ(unit.interpreter_.get(), nullptr);
 
-  protected:
-    CLIOptions cli_options_;
-    TFLiteInferenceEngine unit_;
-};
+    EXPECT_NO_THROW(unit.Init());
 
-TEST_F(TFLiteInferenceEngineTestFixture, WhenInitialized)
-{
-    EXPECT_EQ(unit_.model_.get(), nullptr);
-    EXPECT_EQ(unit_.interpreter_.get(), nullptr);
-
-    EXPECT_NO_THROW(unit_.Init());
-
-    EXPECT_NE(unit_.model_.get(), nullptr);
-    EXPECT_NE(unit_.interpreter_.get(), nullptr);
+    EXPECT_NE(unit.model_.get(), nullptr);
+    EXPECT_NE(unit.interpreter_.get(), nullptr);
 }
 
-TEST_F(TFLiteInferenceEngineTestFixture, WhenExecute)
+TEST(TFLiteInferenceEngineTest, WhenExecute)
 {
-    EXPECT_NO_THROW(unit_.Init());
+    TFLiteInferenceEngine unit;
+    EXPECT_NO_THROW(unit.Init());
 
-    EXPECT_NO_THROW(unit_.Execute());
+    EXPECT_NO_THROW(unit.Execute());
 
-    EXPECT_EQ(unit_.GetResults().size(), 4);
+    EXPECT_NO_THROW(unit.Shutdown());
+    EXPECT_EQ(unit.GetResults().size(), 4);
+}
+
+TEST(TFLiteInferenceEngineTest, WhenExecuteWithCLIOptions)
+{
+    CLIOptions cli_options;
+    cli_options.profiling = true;
+    cli_options.verbose = true;
+    TFLiteInferenceEngine unit{cli_options};
+    EXPECT_NO_THROW(unit.Init());
+
+    EXPECT_NO_THROW(unit.Execute());
+
+    EXPECT_EQ(unit.GetResults().size(), 4);
+}
+TEST(TFLiteInferenceEngineTest, WhenInvalidModelPath)
+{
+    CLIOptions cli_options;
+    cli_options.model_name = "test.tflite";
+    EXPECT_THROW(TFLiteInferenceEngine{cli_options}, std::runtime_error);
+}
+TEST(TFLiteInferenceEngineTest, WhenInvalidLabelPath)
+{
+    TFLiteInferenceEngine unit;
+    unit.label_path_ = "invalid";
+    EXPECT_THROW(unit.GetLabelList(), std::runtime_error);
 }
 }  // namespace
 }  // namespace perception
