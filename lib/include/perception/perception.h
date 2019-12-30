@@ -1,38 +1,36 @@
 ///
 /// @file
-/// @copyright Copyright (c) 2019. All Rights Reserved.
+/// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_PERCEPTION_H_
 #define PERCEPTION_PERCEPTION_H_
 
-#include "perception/cli.h"
-#include "perception/i_inference_engine.h"
+#include "perception/argument_parser/i_argument_parser.h"
+#include "perception/inference_engine/i_inference_engine.h"
 
 namespace perception
 {
 class Perception
 {
   public:
-    enum class InferenceType : std::int32_t
+    enum class InferenceEngineType : std::int32_t
     {
-        kNone = 0,
-        kClassification = 1,
-        kDetection = 2
+        kInvalid,
+        kTFLiteInferenceEngine,
     };
 
-    explicit Perception(const CLIOptions& cli_opts);
-    virtual ~Perception();
+    explicit Perception(std::unique_ptr<IArgumentParser> argument_parser);
+    virtual ~Perception() = default;
+
+    virtual void SelectInferenceEngine(const InferenceEngineType& type);
 
     virtual void Init();
-
-    virtual void SetInferenceType(const InferenceType& inference_type);
-
-    virtual void RunInference(const std::string& image_path);
+    virtual void Execute();
+    virtual void Shutdown();
 
   private:
-    bool initialised_;
-    CLIOptions cli_opts_;
     std::unique_ptr<IInferenceEngine> inference_engine_;
+    std::unique_ptr<IArgumentParser> argument_parser_;
 };
 
 }  // namespace perception

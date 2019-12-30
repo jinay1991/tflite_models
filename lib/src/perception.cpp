@@ -1,44 +1,41 @@
 ///
 /// @file
-/// @copyright Copyright (c) 2019. All Rights Reserved.
+/// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
+#include <string>
+
+#include "perception/inference_engine/tflite_inference_engine.h"
 #include "perception/perception.h"
-#include "perception/inference_engine.h"
 
 namespace perception
 {
-Perception::Perception(const CLIOptions& cli_opts)
-    : initialised_{false}, cli_opts_{cli_opts}, inference_engine_{std::make_unique<InferenceEngine>(cli_opts_)}
+Perception::Perception(std::unique_ptr<IArgumentParser> argument_parser) : argument_parser_{std::move(argument_parser)}
 {
 }
 
-Perception::~Perception() { inference_engine_->Shutdown(); }
-
-void Perception::SetInferenceType(const InferenceType& inference_type)
+void Perception::SelectInferenceEngine(const InferenceEngineType& type)
 {
-    switch (inference_type)
+    switch (type)
     {
-        case InferenceType::kDetection:
-            throw std::runtime_error("Unsupported for Detection tasks\n");
-        case InferenceType::kClassification:
+        case InferenceEngineType::kTFLiteInferenceEngine:
+            inference_engine_ = std::make_unique<TFLiteInferenceEngine>(argument_parser_->GetParsedArgs());
+            break;
+        case InferenceEngineType::kInvalid:
         default:
-            inference_engine_ = std::make_unique<InferenceEngine>(cli_opts_);
+            throw std::runtime_error("Unsupported for InferenceEngine \n");
             break;
     }
 }
-void Perception::Init()
+void Perception::Init() { inference_engine_->Init(); }
+
+void Perception::Execute()
 {
-    inference_engine_->Init();
-    initialised_ = true;
+    for (auto iter = 0; iter < argument_parser_->GetParsedArgs().loop_count; ++iter)
+    {
+        inference_engine_->Execute();
+    }
 }
 
-void Perception::RunInference(const std::string& image_path)
-{
-    if (!initialised_)
-    {
-        throw std::runtime_error("Inference Engine is uninitialized!!\n");
-    }
-    inference_engine_->ExecuteStep(image_path);
-}
+void Perception::Shutdown() { inference_engine_->Shutdown(); }
 
 }  // namespace perception

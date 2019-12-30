@@ -1,6 +1,6 @@
 ///
 /// @file
-/// @copyright Copyright (c) 2019. All Rights Reserved.
+/// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_UTILS_BITMAP_HELPER_H_
 #define PERCEPTION_UTILS_BITMAP_HELPER_H_
@@ -20,7 +20,7 @@ class BitmapImageHelper : public IImageHelper
     BitmapImageHelper() = default;
     virtual ~BitmapImageHelper() = default;
 
-    virtual std::vector<std::uint8_t> ReadImage(const std::string& input_bmp_name, std::int32_t* width,
+    virtual std::vector<std::uint8_t> ReadImage(const std::string& input_name, std::int32_t* width,
                                                 std::int32_t* height, std::int32_t* channels) override;
 
   private:

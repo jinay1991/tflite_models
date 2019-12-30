@@ -1,21 +1,26 @@
 ///
 /// @file
-/// @copyright Copyright (c) 2019. All Rights Reserved.
+/// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <iostream>
+#include <memory>
 
-#include "perception/cli.h"
+#include "perception/argument_parser/argument_parser.h"
+#include "perception/argument_parser/i_argument_parser.h"
 #include "perception/perception.h"
 
 int main(int argc, char** argv)
 {
     try
     {
-        auto cli_opts = perception::ParseCommandLineOptions(argc, argv);
-        auto perception_app = std::make_unique<perception::Perception>(cli_opts);
+        std::unique_ptr<perception::IArgumentParser> argument_parser =
+            std::make_unique<perception::ArgumentParser>(argc, argv);
+        auto perception = std::make_unique<perception::Perception>(std::move(argument_parser));
+        perception->SelectInferenceEngine(perception::Perception::InferenceEngineType::kTFLiteInferenceEngine);
 
-        perception_app->Init();
-        perception_app->RunInference(cli_opts.input_bmp_name);
+        perception->Init();
+        perception->Execute();
+        perception->Shutdown();
     }
     catch (std::exception& e)
     {

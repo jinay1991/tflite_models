@@ -2,14 +2,12 @@
 ''' JPEG Lib Definitions '''
 namespace Jpeg {
 class Decoder {
-    
 }
 }
 
 ''' Bitmap Lib Definitions '''
 namespace Bitmap {
-class Decoder {
-    
+class Decoder { 
 }
 }
 
@@ -22,14 +20,6 @@ class Interpreter {
 }
 }
 
-' ''' TF Definitions '''
-' namespace tensorflow {
-' }
-
-' ''' Torch Definitions '''
-' namespace torch {
-' }
-
 namespace perception{ 
 ''' Data Structures '''
 class CLIOptions << (S,#FF7700) >> {
@@ -37,8 +27,8 @@ class CLIOptions << (S,#FF7700) >> {
 
 ''' Interfaces '''
 interface IArgumentParser {
+    + {abstract} GetParsedArgs(): CLIOptions
     + {abstract} ParseArgs(): CLIOptions
-    + {abstract} AddArgument(): void
 }
 
 interface IInferenceEngine {
@@ -48,27 +38,19 @@ interface IInferenceEngine {
 }
 
 interface IImageHelper {
+    - {abstract} DecodeImage(): uint8_t[]
     + {abstract} ReadImage(): uint8_t[]
     + {abstract} ResizeImage(): uint8_t[]
     + {abstract} GetImageWidth(): int32_t
     + {abstract} GetImageHeight(): int32_t
     + {abstract} GetImageChannels(): int32_t
-    - {abstract} DecodeImage(): uint8_t[]
 }
 
 ''' Interface Implementation '''
-abstract ArgumentParserBase{
-    # args: CLIOptions
-    # AddArgument(): void
-}
-
-class LinuxArgumentParser {
+class ArgumentParser {
+    + GetParsedArgs(): CLIOptions
     + ParseArgs(int argc, char** argv): CLIOptions
 }
-
-' class WindowsArgumentParser {
-'     + ParseArgs(int argc, char** argv): CLIOptions
-' }
 
 class ImageHelperBase {
     # width: int32_t
@@ -80,76 +62,80 @@ class ImageHelperBase {
 }
 
 class JpegImageHelper {
-    + ReadImage(): uint8_t[]
-    + ResizeImage(): uint8_t[]
     - DecodeImage(): uint8_t[]
     - decoder: Decoder
+    + ReadImage(): uint8_t[]
+    + ResizeImage(): uint8_t[]
 }
 
 class BitmapImageHelper {
-    + ReadImage(): uint8_t[]
-    + ResizeImage(): uint8_t[]
     - DecodeImage(): uint8_t[]
     - decoder: Decoder
+    + ReadImage(): uint8_t[]
+    + ResizeImage(): uint8_t[]
 }
 
 enum InferenceEngineType {
     kInvalid
     kTFLiteInferenceEngine
-    ' kTFInferenceEngine
-    ' kTorchInferenceEngine
 }
 
 abstract InferenceEngineBase {
-    # image_path: string
-    # model_path: string
-    # label_path: string
-    # image_helper: IImageHelper
-    # results: string[]
-    + SelectInferenceEngine(): void
-    + GetLabelList(): string[]
-    + GetImageData(): uint8_t[]
-    + GetImageWidth(): int32_t
-    + GetImageHeight(): int32_t
-    + GetImageChannels(): int32_t
-    + GetResults(top_k): string[]
-    - GetTopKResults(): string[]
+    - cli_options: CLIOptions
+    - label_count: int32_t
+    - width: int32_t
+    - height: int32_t
+    - channels: int32_t
+    - image_path: string
+    - model_path: string
+    - label_path: string
+    - image_helper: IImageHelper
+    # {abstract} GetIntermediateOutput(): (string, string)[]
+    # {abstract} GetResults(top_k): (float, int32_t)[]
+    # GetImageChannels(): int32_t
+    # GetImageData(): uint8_t[]
+    # GetImageHeight(): int32_t
+    # GetImagePath(): int32_t
+    # GetImageWidth(): int32_t
+    # GetLabelCount(): int32_t
+    # GetLabelList(): string[]
+    # GetLabelPath(): int32_t
+    # GetMaxProfilingBufferEntries(): int32_t
+    # GetModelPath(): int32_t
+    # GetNumberOfThreads(): int32_t
+    # GetResultDirectory(): string
+    # IsProfilingEnabled(): bool
+    # IsVerbosityEnabled(): bool
+    + InferenceEngineBase(CLIOption)
 }
 
 class TFLiteInferenceEngine {
     - model: FlatModelBuffer
     - interpreter: Interpreter
+    - SetInputData(): void
+    - InvokeInference(): void
+    # GetIntermediateOutput(): (string, string)[]
+    # GetResults(top_k): (float, int32_t)[]
+    + TFLiteInferenceEngine(CLIOptions)
     + Init(): void
     + Execute(): void
     + Shutdown(): void
 }
 
-' class TFInferenceEngine {
-'     + Init(): void
-'     + Shutdown(): void
-'     + Execute(): void
-' }
-
-' class TorchInferenceEngine {
-'     + Init(): void
-'     + Shutdown(): void
-'     + Execute(): void
-' }
 
 class Perception {
-    - args: IArgumentParser
+    - argument_parser: IArgumentParser
     - inference_engine: IInferenceEngine
-    - RunFor(count): void
+    + Perception(IArgumentParser*)
+    + SelectInferenceEngine(InferenceEngineType): void
     + Init(): void
     + Execute(): void
     + Shutdown(): void
 }
 
 ''' Relation '''
-IArgumentParser <|-down- ArgumentParserBase
-ArgumentParserBase *-right- CLIOptions
-ArgumentParserBase <|-down- LinuxArgumentParser
-' ArgumentParserBase <|-down- WindowsArgumentParser
+IArgumentParser <|-down- ArgumentParser
+ArgumentParser *-right- CLIOptions
 
 IImageHelper <|-down- ImageHelperBase
 ImageHelperBase <|-down- JpegImageHelper
@@ -160,7 +146,6 @@ BitmapImageHelper *-down- Bitmap.Decoder
 
 IInferenceEngine <|-down- InferenceEngineBase
 
-InferenceEngineBase -right- InferenceEngineType
 InferenceEngineBase *-left- IImageHelper
 InferenceEngineBase <|-- TFLiteInferenceEngine
 ' InferenceEngineBase <|-- TFInferenceEngine
@@ -172,6 +157,7 @@ InferenceEngineBase <|-- TFLiteInferenceEngine
 TFLiteInferenceEngine *-right- tflite.FlatModelBuffer
 TFLiteInferenceEngine *-down- tflite.Interpreter
 
+Perception -right- InferenceEngineType
 Perception *-- IInferenceEngine
 Perception *-- IArgumentParser
 }

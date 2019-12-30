@@ -12,6 +12,7 @@ model/
 *.tflite
 *.pb
 intermediate_layers_py/
+intermediate_layers/
 
 # Prerequisites
 *.d
