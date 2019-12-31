@@ -28,7 +28,7 @@ std::vector<std::uint8_t> JpegImageHelper::ReadImage(const std::string& input_jp
 std::vector<std::uint8_t> JpegImageHelper::DecodeImage(const std::uint8_t* input) const
 {
     std::vector<uint8_t> output(jpeg_decoder_->GetImageSize());
-    for (auto i = 0; i < output.size(); ++i)
+    for (std::size_t i = 0; i < output.size(); ++i)
     {
         output[i] = input[i];
     }
