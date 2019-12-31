@@ -10,7 +10,6 @@
 #include "perception/utils/bitmap_helper.h"
 #include "perception/utils/get_top_n.h"
 #include "perception/utils/i_image_helper.h"
-#include "perception/utils/resize.h"
 
 namespace perception
 {

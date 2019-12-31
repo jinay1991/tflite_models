@@ -4,11 +4,13 @@
 ///
 #include <fstream>
 
-#include "perception/utils/jpeg_decoder.h"
-#include "perception/utils/jpeg_helper.h"
+#include "perception/image_helper/jpeg_helper.h"
 
 namespace perception
 {
+JpegImageHelper::JpegImageHelper() {}
+JpegImageHelper::~JpegImageHelper() {}
+
 std::vector<std::uint8_t> JpegImageHelper::ReadImage(const std::string& input_jpeg_name, std::int32_t* width,
                                                      std::int32_t* height, std::int32_t* channels)
 {

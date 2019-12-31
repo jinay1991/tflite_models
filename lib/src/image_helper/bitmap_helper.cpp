@@ -16,10 +16,13 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 
-#include "perception/utils/bitmap_helper.h"
+#include "perception/image_helper/bitmap_helper.h"
 
 namespace perception
 {
+BitmapImageHelper::BitmapImageHelper() : width_{224}, height_{224}, channels_{3} {}
+BitmapImageHelper::~BitmapImageHelper() {}
+
 std::vector<std::uint8_t> BitmapImageHelper::ReadImage(const std::string& input_name, std::int32_t* width,
                                                        std::int32_t* height, std::int32_t* channels)
 {

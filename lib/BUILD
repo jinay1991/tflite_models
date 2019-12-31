@@ -6,9 +6,44 @@ config_setting(
 )
 
 cc_library(
+    name = "jpeg_decoder",
+    srcs = ["include/perception/image_helper/jpeg_decoder.h"],
+    hdrs = ["include/perception/image_helper/jpeg_decoder.h"],
+    copts = [
+        "-Wno-error=deprecated-register",
+    ],
+    linkstatic = True,
+    strip_include_prefix = "include",
+)
+
+cc_library(
+    name = "image_helpers",
+    srcs = glob(["src/image_helper/*.cpp"]),
+    hdrs = glob(
+        ["include/perception/image_helper/*.h"],
+        exclude = ["include/perception/image_helper/jpeg_decoder.h"],
+    ),
+    copts = [
+        "-Wall",
+        "-Werror",
+    ],
+    strip_include_prefix = "include",
+    deps = [
+        ":jpeg_decoder",
+    ],
+)
+
+cc_library(
     name = "utils",
     srcs = glob(["src/utils/*.cpp"]),
-    hdrs = glob(["include/perception/utils/*.h"]),
+    hdrs = glob(
+        ["include/perception/utils/*.h"],
+        exclude = ["include/perception/utils/jpeg_decoder.h"],
+    ),
+    copts = [
+        "-Wall",
+        "-Werror",
+    ],
     linkopts = select({
         ":darwin": [],
         "//conditions:default": ["-lstdc++fs"],
@@ -47,6 +82,7 @@ cc_library(
     strip_include_prefix = "include",
     deps = [
         ":argument_parser",
+        ":image_helpers",
         ":utils",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -55,6 +91,7 @@ cc_library(
         "@org_tensorflow//tensorflow/lite:string",
         "@org_tensorflow//tensorflow/lite:string_util",
         "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
+        "@org_tensorflow//tensorflow/lite/profiling:profile_summarizer",
         "@org_tensorflow//tensorflow/lite/profiling:profiler",
         "@org_tensorflow//tensorflow/lite/schema:schema_fbs",
         "@org_tensorflow//tensorflow/lite/tools/evaluation:utils",

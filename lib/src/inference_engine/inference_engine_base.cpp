@@ -8,11 +8,10 @@
 
 #include "absl/strings/match.h"
 
+#include "perception/image_helper/bitmap_helper.h"
+#include "perception/image_helper/jpeg_helper.h"
 #include "perception/inference_engine/inference_engine_base.h"
-#include "perception/utils/bitmap_helper.h"
 #include "perception/utils/get_top_n.h"
-#include "perception/utils/jpeg_helper.h"
-#include "perception/utils/resize.h"
 
 #define ASSERT_PATH_EXISTS(path)                                     \
     do                                                               \
@@ -30,7 +29,6 @@ InferenceEngineBase::InferenceEngineBase(const CLIOptions& cli_options)
     : cli_options_{cli_options},
       channels_{3},
       height_{224},
-      label_count_{0},
       width_{224},
       image_path_{cli_options_.input_name},
       label_path_{cli_options_.labels_name},

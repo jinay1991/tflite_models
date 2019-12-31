@@ -13,6 +13,7 @@ namespace perception
 class IInferenceEngine
 {
   public:
+    virtual ~IInferenceEngine() = default;
     virtual void Init() = 0;
     virtual void Execute() = 0;
     virtual void Shutdown() = 0;

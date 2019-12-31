@@ -2,8 +2,10 @@
 /// @file
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
+#include <memory>
 #include <string>
 
+#include "perception/argument_parser/i_argument_parser.h"
 #include "perception/inference_engine/tflite_inference_engine.h"
 #include "perception/perception.h"
 

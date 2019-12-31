@@ -12,6 +12,7 @@ namespace perception
 class IArgumentParser
 {
   public:
+    virtual ~IArgumentParser() = default;
     virtual CLIOptions GetParsedArgs() const = 0;
 
   protected:
