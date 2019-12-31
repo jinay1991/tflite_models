@@ -180,26 +180,6 @@ void PrintOutput(const std::vector<std::pair<float, std::int32_t>>& top_results,
     }
 }
 
-void PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, const std::uint32_t op_index,
-                        const TfLiteTensor* tensor, const TfLiteRegistration& registration)
-{
-    // output something like
-    //  time (ms), Node xxx, OpCode xxx,     symbolic name,    dimension,   type
-    //      5.352, Node   5, OpCode   4, DEPTHWISE_CONV_2D, [1 1 1 1280],  uint8
-    static bool print_header = true;
-    if (print_header)
-    {
-        LOG(INFO) << " time (ms), Node xxx, OpCode xxx,        symbolic name,              dimension,   type\n";
-        print_header = false;
-    }
-    LOG(INFO) << std::fixed << std::setw(10) << std::setprecision(3)
-              << (e->end_timestamp_us - e->begin_timestamp_us) / 1000.0 << ", Node " << std::setw(3)
-              << std::setprecision(3) << op_index << ", OpCode " << std::setw(3) << std::setprecision(3)
-              << registration.builtin_code << ", " << std::setw(20)
-              << tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code))
-              << ", [" << tensor->dims << "], " << std::setw(6) << tensor->type << "\n";
-}
-
 }  // namespace
 
 TFLiteInferenceEngine::TFLiteInferenceEngine() {}
@@ -290,20 +270,7 @@ void TFLiteInferenceEngine::Execute()
         auto profile_events = profiler->GetProfileEvents();
         summarizer.ProcessProfiles(profile_events, *interpreter_);
         profiler->Reset();
-        auto filename = std::string{GetResultDirectory() + "/performance_metric.txt"};
-        std::ofstream filestream(filename, std::ios::binary);
-        filestream << summarizer.GetOutputString();
-        filestream.close();
-        std::vector<std::int32_t> op_indices;
-        for (std::size_t i = 0; i < profile_events.size(); i++)
-        {
-            auto op_index = profile_events[i]->event_metadata;
-            const auto node_and_registration = interpreter_->node_and_registration(op_index);
-            const auto node = node_and_registration->first;
-            const auto registration = node_and_registration->second;
-            const auto tensor = interpreter_->tensor(node.outputs[0].data[0]);
-            PrintProfilingInfo(profile_events[i], op_index, tensor, registration);
-        }
+        WriteToFile(GetResultDirectory(), "performance_metrics.txt", summarizer.GetOutputString());
     }
     const auto results = GetResults();
     const auto labels = GetLabelList();
@@ -335,6 +302,7 @@ void TFLiteInferenceEngine::InvokeInference()
     auto avg_time_in_ms = (get_us(stop_time) - get_us(start_time)) / (GetLoopCount() * 1000);
     auto images_per_sec = (1.0 / avg_time_in_ms) * 1000.0;
     LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) \n";
+    WriteToFile(GetResultDirectory(), "images_per_second.txt", "images_per_second: " + std::to_string(images_per_sec));
 }
 
 void TFLiteInferenceEngine::SetInputData(const std::vector<std::uint8_t>& image_data)
