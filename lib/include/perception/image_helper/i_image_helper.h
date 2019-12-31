@@ -2,8 +2,8 @@
 /// @file
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
-#ifndef PERCEPTION_UTILS_I_IMAGE_HELPERS_H_
-#define PERCEPTION_UTILS_I_IMAGE_HELPERS_H_
+#ifndef PERCEPTION_IMAGE_HELPER_I_IMAGE_HELPERS_H_
+#define PERCEPTION_IMAGE_HELPER_I_IMAGE_HELPERS_H_
 
 #include <cstdint>
 #include <string>
@@ -14,6 +14,7 @@ namespace perception
 class IImageHelper
 {
   public:
+    virtual ~IImageHelper() = default;
     virtual std::vector<std::uint8_t> ReadImage(const std::string& image_path, std::int32_t* width,
                                                 std::int32_t* height, std::int32_t* channels) = 0;
 
@@ -23,4 +24,4 @@ class IImageHelper
 
 }  // namespace perception
 
-#endif  /// PERCEPTION_UTILS_I_IMAGE_HELPERS_H_
+#endif  /// PERCEPTION_IMAGE_HELPER_I_IMAGE_HELPERS_H_

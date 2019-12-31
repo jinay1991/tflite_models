@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "perception/argument_parser/cli_options.h"
+#include "perception/image_helper/i_image_helper.h"
 #include "perception/inference_engine/i_inference_engine.h"
-#include "perception/utils/i_image_helper.h"
 
 namespace perception
 {
@@ -46,7 +46,6 @@ class InferenceEngineBase : public IInferenceEngine
     CLIOptions cli_options_;
     std::int32_t channels_;
     std::int32_t height_;
-    std::int32_t label_count_;
     std::int32_t width_;
     std::string image_path_;
     std::string label_path_;

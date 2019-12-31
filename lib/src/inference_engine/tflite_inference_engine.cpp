@@ -13,10 +13,13 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/match.h"
+#include "tensorflow/lite/builtin_op_data.h"
 #include "tensorflow/lite/core/api/profiler.h"
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
+#include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/optional_debug_tools.h"
+#include "tensorflow/lite/profiling/profile_summarizer.h"
 #include "tensorflow/lite/string_util.h"
 #include "tensorflow/lite/tools/evaluation/utils.h"
 #define TFLITE_PROFILING_ENABLED
@@ -24,7 +27,6 @@
 
 #include "perception/inference_engine/tflite_inference_engine.h"
 #include "perception/utils/get_top_n.h"
-#include "perception/utils/resize.h"
 
 #define LOG(x) std::cerr
 
@@ -33,47 +35,6 @@ namespace perception
 namespace
 {
 constexpr double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
-
-void WriteToFile(const std::string& dirname, const std::string& filename, const std::string& content)
-{
-    const auto filepath = std::string{dirname + "/" + filename};
-    std::ofstream file(filepath, std::ios::binary);
-    if (!file.is_open())
-    {
-        throw std::runtime_error("Unable to open " + filepath);
-    }
-    file << content;
-}
-
-void PrintOutput(const std::vector<std::pair<float, std::int32_t>>& top_results, const std::vector<std::string>& labels)
-{
-    for (const auto& result : top_results)
-    {
-        const float confidence = result.first;
-        const std::int32_t index = result.second;
-        LOG(INFO) << confidence << ": " << labels[index] << "\n";
-    }
-}
-
-void PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, const std::uint32_t op_index,
-                        const TfLiteTensor* tensor, const TfLiteRegistration& registration)
-{
-    // output something like
-    //  time (ms), Node xxx, OpCode xxx,     symbolic name,    dimension,   type
-    //      5.352, Node   5, OpCode   4, DEPTHWISE_CONV_2D, [1 1 1 1280],  uint8
-    static bool print_header = true;
-    if (print_header)
-    {
-        LOG(INFO) << " time (ms), Node xxx, OpCode xxx,        symbolic name,              dimension,   type\n";
-        print_header = false;
-    }
-    LOG(INFO) << std::fixed << std::setw(10) << std::setprecision(3)
-              << (e->end_timestamp_us - e->begin_timestamp_us) / 1000.0 << ", Node " << std::setw(3)
-              << std::setprecision(3) << op_index << ", OpCode " << std::setw(3) << std::setprecision(3)
-              << registration.builtin_code << ", " << std::setw(20)
-              << tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code))
-              << ", [" << tensor->dims << "], " << std::setw(6) << tensor->type << "\n";
-}
 
 inline std::ostream& operator<<(std::ostream& os, const TfLiteIntArray* v)
 {
@@ -133,7 +94,114 @@ inline std::ostream& operator<<(std::ostream& os, const TfLiteType& type)
     return os;
 }
 
+template <class T>
+void ResizeImage(T* out, const std::uint8_t* in, const std::int32_t image_height, const std::int32_t image_width,
+                 const std::int32_t image_channels, const std::int32_t wanted_height, const std::int32_t wanted_width,
+                 const std::int32_t wanted_channels, const bool input_floating, const float input_mean,
+                 const float input_std)
+{
+    std::int32_t number_of_pixels = image_height * image_width * image_channels;
+    std::unique_ptr<tflite::Interpreter> interpreter = std::make_unique<tflite::Interpreter>();
+
+    std::int32_t base_index = 0;
+
+    // two inputs: input and new_sizes
+    interpreter->AddTensors(2, &base_index);
+    // one output
+    interpreter->AddTensors(1, &base_index);
+    // set input and output tensors
+    interpreter->SetInputs({0, 1});
+    interpreter->SetOutputs({2});
+
+    // set parameters of tensors
+    TfLiteQuantizationParams quant;
+    interpreter->SetTensorParametersReadWrite(0, kTfLiteFloat32, "input",
+                                              {1, image_height, image_width, image_channels}, quant);
+    interpreter->SetTensorParametersReadWrite(1, kTfLiteInt32, "new_size", {2}, quant);
+    interpreter->SetTensorParametersReadWrite(2, kTfLiteFloat32, "output",
+                                              {1, wanted_height, wanted_width, wanted_channels}, quant);
+
+    tflite::ops::builtin::BuiltinOpResolver resolver;
+    const TfLiteRegistration* resize_op = resolver.FindOp(tflite::BuiltinOperator_RESIZE_BILINEAR, 1);
+    auto* params = reinterpret_cast<TfLiteResizeBilinearParams*>(malloc(sizeof(TfLiteResizeBilinearParams)));
+    params->align_corners = false;
+    interpreter->AddNodeWithParameters({0, 1}, {2}, nullptr, 0, params, resize_op, nullptr);
+
+    interpreter->AllocateTensors();
+
+    // fill input image
+    // in[] are integers, cannot do memcpy() directly
+    auto input = interpreter->typed_tensor<float>(0);
+    for (std::int32_t i = 0; i < number_of_pixels; i++)
+    {
+        input[i] = in[i];
+    }
+
+    // fill new_sizes
+    interpreter->typed_tensor<std::int32_t>(1)[0] = wanted_height;
+    interpreter->typed_tensor<std::int32_t>(1)[1] = wanted_width;
+
+    interpreter->Invoke();
+
+    auto output = interpreter->typed_tensor<float>(2);
+    auto output_number_of_pixels = wanted_height * wanted_width * wanted_channels;
+
+    for (std::int32_t i = 0; i < output_number_of_pixels; i++)
+    {
+        if (input_floating)
+        {
+            out[i] = (output[i] - input_mean) / input_std;
+        }
+        else
+        {
+            out[i] = static_cast<std::uint8_t>(output[i]);
+        }
+    }
+}
+
+void WriteToFile(const std::string& dirname, const std::string& filename, const std::string& content)
+{
+    const auto filepath = std::string{dirname + "/" + filename};
+    std::ofstream file(filepath, std::ios::binary);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Unable to open " + filepath);
+    }
+    file << content;
+}
+
+void PrintOutput(const std::vector<std::pair<float, std::int32_t>>& top_results, const std::vector<std::string>& labels)
+{
+    for (const auto& result : top_results)
+    {
+        const float confidence = result.first;
+        const std::int32_t index = result.second;
+        LOG(INFO) << confidence << ": " << labels[index] << "\n";
+    }
+}
+
+void PrintProfilingInfo(const tflite::profiling::ProfileEvent* e, const std::uint32_t op_index,
+                        const TfLiteTensor* tensor, const TfLiteRegistration& registration)
+{
+    // output something like
+    //  time (ms), Node xxx, OpCode xxx,     symbolic name,    dimension,   type
+    //      5.352, Node   5, OpCode   4, DEPTHWISE_CONV_2D, [1 1 1 1280],  uint8
+    static bool print_header = true;
+    if (print_header)
+    {
+        LOG(INFO) << " time (ms), Node xxx, OpCode xxx,        symbolic name,              dimension,   type\n";
+        print_header = false;
+    }
+    LOG(INFO) << std::fixed << std::setw(10) << std::setprecision(3)
+              << (e->end_timestamp_us - e->begin_timestamp_us) / 1000.0 << ", Node " << std::setw(3)
+              << std::setprecision(3) << op_index << ", OpCode " << std::setw(3) << std::setprecision(3)
+              << registration.builtin_code << ", " << std::setw(20)
+              << tflite::EnumNameBuiltinOperator(static_cast<tflite::BuiltinOperator>(registration.builtin_code))
+              << ", [" << tensor->dims << "], " << std::setw(6) << tensor->type << "\n";
+}
+
 }  // namespace
+
 TFLiteInferenceEngine::TFLiteInferenceEngine() {}
 TFLiteInferenceEngine::TFLiteInferenceEngine(const CLIOptions& cli_options) : InferenceEngineBase{cli_options} {}
 
@@ -207,6 +275,7 @@ void TFLiteInferenceEngine::Execute()
 
     auto profiler = absl::make_unique<tflite::profiling::Profiler>(GetMaxProfilingBufferEntries());
     interpreter_->SetProfiler(profiler.get());
+    tflite::profiling::ProfileSummarizer summarizer;
 
     if (IsProfilingEnabled())
     {
@@ -219,6 +288,12 @@ void TFLiteInferenceEngine::Execute()
     {
         profiler->StopProfiling();
         auto profile_events = profiler->GetProfileEvents();
+        summarizer.ProcessProfiles(profile_events, *interpreter_);
+        profiler->Reset();
+        auto filename = std::string{GetResultDirectory() + "/performance_metric.txt"};
+        std::ofstream filestream(filename, std::ios::binary);
+        filestream << summarizer.GetOutputString();
+        filestream.close();
         std::vector<std::int32_t> op_indices;
         for (std::size_t i = 0; i < profile_events.size(); i++)
         {
@@ -257,7 +332,9 @@ void TFLiteInferenceEngine::InvokeInference()
 
     gettimeofday(&stop_time, nullptr);
     LOG(INFO) << "invoked \n";
-    LOG(INFO) << "average time: " << (get_us(stop_time) - get_us(start_time)) / (GetLoopCount() * 1000) << " ms \n";
+    auto avg_time_in_ms = (get_us(stop_time) - get_us(start_time)) / (GetLoopCount() * 1000);
+    auto images_per_sec = (1.0 / avg_time_in_ms) * 1000.0;
+    LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) \n";
 }
 
 void TFLiteInferenceEngine::SetInputData(const std::vector<std::uint8_t>& image_data)

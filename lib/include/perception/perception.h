@@ -20,7 +20,7 @@ class Perception
     };
 
     explicit Perception(std::unique_ptr<IArgumentParser> argument_parser);
-    ~Perception();
+    virtual ~Perception();
 
     virtual void SelectInferenceEngine(const InferenceEngineType& type);
 

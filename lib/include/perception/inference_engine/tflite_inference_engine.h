@@ -15,8 +15,8 @@
 #include "tensorflow/lite/model.h"
 
 #include "perception/argument_parser/cli_options.h"
+#include "perception/image_helper/i_image_helper.h"
 #include "perception/inference_engine/inference_engine_base.h"
-#include "perception/utils/i_image_helper.h"
 
 namespace perception
 {
