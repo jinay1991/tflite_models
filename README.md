@@ -93,11 +93,6 @@ sudo yum install -y devtoolset-8
 sudo yum install -y git wget 
 sudo yum install -y libtool clang-format-6.0
 sudo yum install -y epel-release
-sudo yum install -y python python-dev python-pip
-
-sudo python -m pip install -U pip 
-sudo python -m pip install -U future
-sudo python -m pip install -U tensorflow 
 
 wget https://copr.fedorainfracloud.org/coprs/vbatts/bazel/repo/epel-7/vbatts-bazel-epel-7.repo && sudo mv vbatts-bazel-epel-7.repo /etc/yum.repos.d
 sudo yum install -y bazel

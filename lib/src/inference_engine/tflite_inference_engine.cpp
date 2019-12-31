@@ -270,7 +270,9 @@ void TFLiteInferenceEngine::Execute()
         auto profile_events = profiler->GetProfileEvents();
         summarizer.ProcessProfiles(profile_events, *interpreter_);
         profiler->Reset();
-        WriteToFile(GetResultDirectory(), "performance_metrics.txt", summarizer.GetOutputString());
+        auto summary = summarizer.GetOutputString();
+        LOG(INFO) << summary;
+        WriteToFile(GetResultDirectory(), "performance_metrics.txt", summary);
     }
     const auto results = GetResults();
     const auto labels = GetLabelList();
