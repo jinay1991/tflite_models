@@ -38,6 +38,7 @@ cppcheck:
     expire_in: 7 days
   only:
     - merge_requests
+    - master
   
 code_quality:
   image: docker:stable
