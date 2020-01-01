@@ -14,8 +14,6 @@ clang-format:
   script:
     - find . -regex '.*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)' -exec cat {} \; | diff -u <(find . -regex '.*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)' -exec clang-format-6.0 -style=file {} -verbose \;) -
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - merge_requests
 
@@ -41,8 +39,6 @@ cppcheck:
       - static_code_analysis.log
     expire_in: 7 days
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - merge_requests
       - master
@@ -66,8 +62,6 @@ code_quality:
     reports:
       codequality: gl-code-quality-report.json
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - merge_requests
     
@@ -87,8 +81,6 @@ bazel-build-and-test:
     name: TestResults
     when: on_success
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
 
@@ -107,8 +99,6 @@ code-coverage:
     when: on_success
     expire_in: 1 day
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
 
@@ -122,8 +112,6 @@ doxygen:
       - doc
     expire_in: 1 day
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
       
@@ -142,12 +130,8 @@ smoke-test:
       - intermediate_layers
     expire_in: 7 days
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
-  
-
 # -------------
 # Stage: Deploy
 # -------------
@@ -169,7 +153,5 @@ pages:
     paths:
       - public
   only:
-    changes: 
-      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
