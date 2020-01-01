@@ -19,7 +19,12 @@ TEST(LoggingWrapperTest, AssertionCompareMacro)
     EXPECT_EXIT(ASSERT_CHECK_EQ(1, 2), ::testing::KilledBySignal(SIGABRT), "");
 }
 
-TEST(LoggingWrapperTest, FATAL_SeverityLevel) { EXPECT_EXIT(LOG(FATAL), ::testing::KilledBySignal(SIGABRT), ""); }
+TEST(LoggingWrapperTest, FatalLogging)
+{
+    auto unit = new LoggingWrapper(LoggingWrapper::LogSeverity::FATAL, true);
+    unit->Stream() << "test";
+    EXPECT_EXIT(delete unit, ::testing::KilledBySignal(SIGABRT), "");
+}
 TEST(LoggingWrapperTest, NoLogging)
 {
     ::testing::internal::CaptureStderr();

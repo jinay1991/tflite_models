@@ -43,6 +43,8 @@ TEST(ArgumentParserTest, ParameterizedConstructor)
     char* argv[] = {"label_image",
                     "-m",
                     "test_model.tflite",
+                    "-f",
+                    "1",
                     "-p",
                     "1",
                     "--image",
