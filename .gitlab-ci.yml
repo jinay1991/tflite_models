@@ -132,7 +132,7 @@ smoke-test:
   dependencies:
     - bazel-build-and-test
   script: 
-    - bazel run //:label_image -- -d intermediate_layers
+    - bazel run //:label_image -- -d intermediate_layers -f 1
     - cp -R bazel-bin/label_image.runfiles/__main__/intermediate_layers .
   artifacts:
     paths:

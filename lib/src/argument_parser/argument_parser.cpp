@@ -48,7 +48,7 @@ ArgumentParser::ArgumentParser(int argc, char* argv[])
                     {"save_results", required_argument, nullptr, 'f'},
                     {"help", 0, nullptr, 'h'},
                     {nullptr, 0, nullptr, 0}},
-      optstring_{"b:c:d:e:h:i:l:m:p:r:s:v:t:"}
+      optstring_{"b:c:d:e:f:h:i:l:m:p:r:s:v:t:"}
 {
     cli_options_ = ParseArgs(argc, argv);
 }
