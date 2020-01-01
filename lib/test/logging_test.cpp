@@ -24,9 +24,9 @@ TEST(LoggingWrapperTest, NoLogging)
 {
     ::testing::internal::CaptureStderr();
     ::testing::internal::CaptureStdout();
-    LoggingWrapper(LoggingWrapper::LogSeverity::INFO, false);
-    LoggingWrapper(LoggingWrapper::LogSeverity::ERROR, false);
-    LoggingWrapper(LoggingWrapper::LogSeverity::WARN, false);
+    LoggingWrapper(LoggingWrapper::LogSeverity::INFO, false).Stream() << "test";
+    LoggingWrapper(LoggingWrapper::LogSeverity::ERROR, false).Stream() << "test";
+    LoggingWrapper(LoggingWrapper::LogSeverity::WARN, false).Stream() << "test";
     EXPECT_TRUE(::testing::internal::GetCapturedStdout().empty());
     EXPECT_TRUE(::testing::internal::GetCapturedStderr().empty());
 }
@@ -34,8 +34,8 @@ TEST(LoggingWrapperTest, OnStandardOutput)
 {
     ::testing::internal::CaptureStderr();
     ::testing::internal::CaptureStdout();
-    LoggingWrapper(LoggingWrapper::LogSeverity::INFO, true);
-    LoggingWrapper(LoggingWrapper::LogSeverity::WARN, true);
+    LoggingWrapper(LoggingWrapper::LogSeverity::INFO, true).Stream() << "test";
+    LoggingWrapper(LoggingWrapper::LogSeverity::WARN, true).Stream() << "test";
     EXPECT_FALSE(::testing::internal::GetCapturedStdout().empty());
     EXPECT_TRUE(::testing::internal::GetCapturedStderr().empty());
 }
@@ -43,7 +43,7 @@ TEST(LoggingWrapperTest, OnStandardError)
 {
     ::testing::internal::CaptureStderr();
     ::testing::internal::CaptureStdout();
-    LoggingWrapper(LoggingWrapper::LogSeverity::ERROR, true);
+    LoggingWrapper(LoggingWrapper::LogSeverity::ERROR, true).Stream() << "test";
     EXPECT_TRUE(::testing::internal::GetCapturedStdout().empty());
     EXPECT_FALSE(::testing::internal::GetCapturedStderr().empty());
 }
