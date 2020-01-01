@@ -22,8 +22,8 @@ limitations under the License.
 
 namespace perception
 {
-// Returns the top N confidence values over threshold in the provided vector,
-// sorted by confidence in descending order.
+/// @brief Returns the top N confidence values over threshold in the provided vector,
+/// sorted by confidence in descending order.
 template <class T>
 void get_top_n(T* prediction, int prediction_size, size_t num_results, float threshold,
                std::vector<std::pair<float, int>>* top_results, bool input_floating)

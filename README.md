@@ -70,6 +70,34 @@ average time: 68.12 ms
 
 See the `lib/src/argument_parser/cli_options.cpp` source code for other command line options.
 
+## Command Line Options
+
+You can query all the supported command line options information by running following command:
+
+```
+bazel-bin/label_image -h
+```
+
+You should see all the information on command line options as below:
+
+
+```
+label_image
+--count, -c: loop interpreter->Invoke() for certain times
+--input_mean, -b: input mean
+--input_std, -s: input standard deviation
+--image, -i: image_name.bmp
+--max_profiling_buffer_entries, -e: maximum profiling buffer entries
+--labels, -l: labels for the model
+--tflite_model, -m: model_name.tflite
+--profiling, -p: [0|1], profiling or not
+--num_results, -r: number of results to show
+--threads, -t: number of threads
+--verbose, -v: [0|1] print more information
+--result_directory, -d: directory path
+--help, -h: print help
+```
+
 ## Docker
 
 Run with docker images.

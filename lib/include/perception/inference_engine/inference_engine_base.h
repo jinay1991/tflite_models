@@ -25,21 +25,49 @@ class InferenceEngineBase : public IInferenceEngine
     virtual ~InferenceEngineBase();
 
   protected:
+    /// @brief Provides Decoded Image Data
     virtual std::vector<std::uint8_t> GetImageData();
+
+    /// @brief Provides Labels List
     virtual std::vector<std::string> GetLabelList() const;
 
+    /// @brief Provides Image Width
     virtual std::int32_t GetImageWidth() const;
+
+    /// @brief Provides Image Height
     virtual std::int32_t GetImageHeight() const;
+
+    /// @brief Provides Image Channels
     virtual std::int32_t GetImageChannels() const;
+
+    /// @brief Provides Model Path
     virtual std::string GetModelPath() const;
 
+    /// @brief Reads CLI Option for Profiling Enabled?
+    /// @return true if cli arg `-p` is set to 1, else false
     virtual bool IsProfilingEnabled() const;
+
+    /// @brief Reads CLI Option for Verbosity Enabled?
+    /// @return true if cli arg `-v` is set to 1, else false
     virtual bool IsVerbosityEnabled() const;
+
+    /// @brief Reads CLI Option for Number of threads to use for Inference
     virtual std::int32_t GetNumberOfThreads() const;
+
+    /// @brief Reads CLI Option for Maximum Profiling Buffer Entries.
+    /// @note  Used only when `-p` is set to 1.
     virtual std::int32_t GetMaxProfilingBufferEntries() const;
+
+    /// @brief Reads CLI Option for Input Mean
     virtual float GetInputMean() const;
+
+    /// @brief Reads CLI Option for Input stddev
     virtual float GetInputStd() const;
+
+    /// @brief Reads CLI Option for loop count
     virtual std::int32_t GetLoopCount() const;
+
+    /// @brief Reads CLI Option for result directory
     virtual std::string GetResultDirectory() const;
 
   private:
