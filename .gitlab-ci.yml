@@ -45,6 +45,7 @@ cppcheck:
       - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - merge_requests
+      - master
   
 code_quality:
   image: docker:stable
