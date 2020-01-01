@@ -36,10 +36,26 @@ TEST(TFLiteInferenceEngineTest, WhenExecute)
     EXPECT_EQ(unit.GetResults().size(), CLIOptions().number_of_results);
 }
 
+TEST(TFLiteInferenceEngineTest, WhenBitmapImage)
+{
+    CLIOptions cli_options;
+    cli_options.input_name = "data/grace_hopper.bmp";
+    TFLiteInferenceEngine unit{cli_options};
+    EXPECT_NO_THROW(unit.Init());
+
+    EXPECT_NO_THROW(unit.Execute());
+
+    EXPECT_NO_THROW(unit.Shutdown());
+    EXPECT_EQ(unit.GetResults().size(), CLIOptions().number_of_results);
+}
+
 TEST(TFLiteInferenceEngineTest, WhenExecuteWithCLIOptions)
 {
     CLIOptions cli_options;
     cli_options.number_of_results = 2;
+    cli_options.profiling = true;
+    cli_options.verbose = true;
+    cli_options.save_results = true;
     TFLiteInferenceEngine unit{cli_options};
     EXPECT_NO_THROW(unit.Init());
 
@@ -47,6 +63,7 @@ TEST(TFLiteInferenceEngineTest, WhenExecuteWithCLIOptions)
 
     EXPECT_EQ(unit.GetResults().size(), cli_options.number_of_results);
 }
+
 TEST(TFLiteInferenceEngineTest, WhenInvalidModelPath)
 {
     CLIOptions cli_options;
