@@ -28,8 +28,8 @@ buildifier:
 cppcheck:
   stage: check
   script:
-    - cppcheck --template=gcc --enable=all --inconclusive --std=c++14 -I lib/include/ -I include/ lib/src/*.cpp src/*.cpp  > static_code_analysis.log
-    - cppcheck --template=gcc --enable=all --inconclusive --std=c++14 -I lib/include/ -I include/ lib/src/*.cpp src/*.cpp --xml 2> static_code_analysis.xml
+    - cppcheck --template=gcc --enable=all --inconclusive --std=c++14 -I lib/include/ -I include/ lib/src/**/*.cpp src/**/*.cpp  > static_code_analysis.log
+    - cppcheck --template=gcc --enable=all --inconclusive --std=c++14 -I lib/include/ -I include/ lib/src/**/*.cpp src/**/*.cpp --xml 2> static_code_analysis.xml
     - cppcheck-htmlreport --file=static_code_analysis.xml --report-dir=static_code_analysis_report --source-dir=.
   artifacts:
     name: static_code_analysis
@@ -81,6 +81,9 @@ bazel-build-and-test:
     name: TestResults
     when: on_success
   only:
+    changes:
+      - lib/**/*
+      - src/**/*
     refs:
       - master
 
@@ -99,6 +102,9 @@ code-coverage:
     when: on_success
     expire_in: 1 day
   only:
+    changes:
+      - lib/**/*
+      - src/**/*
     refs:
       - master
 
@@ -112,6 +118,9 @@ doxygen:
       - doc
     expire_in: 1 day
   only:
+    changes:
+      - lib/**/*
+      - src/**/*
     refs:
       - master
       
@@ -130,6 +139,9 @@ smoke-test:
       - intermediate_layers
     expire_in: 7 days
   only:
+    changes:
+      - lib/**/*
+      - src/**/*
     refs:
       - master
 # -------------
@@ -153,5 +165,8 @@ pages:
     paths:
       - public
   only:
+    changes:
+      - lib/**/*
+      - src/**/*
     refs:
       - master

@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM tensorflow/tensorflow:latest
 
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 

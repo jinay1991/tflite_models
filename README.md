@@ -68,18 +68,13 @@ average time: 68.12 ms
 0.00608029: 543 543:drumstick
 ```
 
-See the `lib/src/argument_parser/cli_options.cpp` source code for other command line options.
-
-## Command Line Options
-
-You can query all the supported command line options information by running following command:
+See the `lib/include/argument_parser/cli_options.cpp` source code for other command line options, or run following command.
 
 ```
 bazel-bin/label_image -h
 ```
 
 You should see all the information on command line options as below:
-
 
 ```
 label_image
