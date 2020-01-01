@@ -3,7 +3,7 @@
 This repository contains source code demonstrating how to load a pre-trained and converted
 TensorFlow Lite model and use it to recognize objects in images.
 
-You also need to [install Bazel 26.1](https://docs.bazel.build/versions/master/install.html)
+You also need to [install Bazel](https://docs.bazel.build/versions/master/install.html)
 in order to build this example code. And be sure you have the Python `future`
 module installed:
 
@@ -11,7 +11,7 @@ module installed:
 pip install future --user
 ```
 
-Note that, this repository uses `tensorflow` as bazel external dependency.
+Note that, this repository uses `tensorflow lite` as bazel external dependency.
 
 ## Build 
 
@@ -68,8 +68,19 @@ average time: 68.12 ms
 0.00608029: 543 543:drumstick
 ```
 
-See the `lib/src/cli.cpp` source code for other command line options.
+See the `lib/src/argument_parser/cli_options.cpp` source code for other command line options.
 
+## Docker
+
+Run with docker images.
+
+```
+# Ubuntu 18.04
+docker run -ti -v $(pwd):/workspace registry.gitlab.com/jinay1991/tflite_models
+
+# CentOS 7
+docker run -ti -v $(pwd):/workspace registry.gitlab.com/jinay1991/tflite_models/centos
+```
 
 ## On CentOS 7 or later
 
@@ -80,7 +91,7 @@ export BAZEL_LINKOPTS=-static-libstdc++
 export BAZEL_LINKLIBS=-l%:libstdc++.a
 ```
 
-Use `devtoolset-8` for compiling source with `bazel`. (Refer: `docker/centos/Dockerfile` for more details on dependencies on CentOS 7 or refer below section to configure manually.)
+Use `devtoolset-8` for compiling source with `bazel`. (Refer: `dockerfile/centos.Dockerfile` for more details on dependencies on CentOS 7 or refer below section to configure manually.)
 
 ### Prepare CentOS 7 Environment
 

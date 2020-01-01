@@ -26,9 +26,8 @@
 #include "tensorflow/lite/profiling/profiler.h"
 
 #include "perception/inference_engine/tflite_inference_engine.h"
+#include "perception/logging/logging.h"
 #include "perception/utils/get_top_n.h"
-
-#define LOG(x) std::cerr
 
 namespace perception
 {
@@ -176,7 +175,7 @@ void PrintOutput(const std::vector<std::pair<float, std::int32_t>>& top_results,
     {
         const float confidence = result.first;
         const std::int32_t index = result.second;
-        LOG(INFO) << confidence << ": " << labels[index] << "\n";
+        LOG(INFO) << confidence << ": " << labels[index];
     }
 }
 
@@ -194,9 +193,9 @@ void TFLiteInferenceEngine::Init()
     {
         throw std::runtime_error("Failed to mmap model " + GetModelPath());
     }
-    LOG(INFO) << "Loaded model " << GetModelPath() << std::endl;
+    LOG(INFO) << "Loaded model " << GetModelPath();
     model_->error_reporter();
-    LOG(INFO) << "Resolved reporter\n";
+    LOG(INFO) << "Resolved reporter.";
 
     tflite::ops::builtin::BuiltinOpResolver resolver;
 
@@ -205,13 +204,13 @@ void TFLiteInferenceEngine::Init()
     {
         throw std::runtime_error("Failed to construct interpreter");
     }
-    LOG(INFO) << "Built TfLite Interpreter\n";
+    LOG(INFO) << "Built TfLite Interpreter";
     if (IsVerbosityEnabled())
     {
-        LOG(INFO) << "tensors size: " << interpreter_->tensors_size() << "\n";
-        LOG(INFO) << "nodes size: " << interpreter_->nodes_size() << "\n";
-        LOG(INFO) << "inputs: " << interpreter_->inputs().size() << "\n";
-        LOG(INFO) << "input(0) name: " << interpreter_->GetInputName(0) << "\n";
+        LOG(INFO) << "tensors size: " << interpreter_->tensors_size();
+        LOG(INFO) << "nodes size: " << interpreter_->nodes_size();
+        LOG(INFO) << "inputs: " << interpreter_->inputs().size();
+        LOG(INFO) << "input(0) name: " << interpreter_->GetInputName(0);
 
         int tensor_size = interpreter_->tensors_size();
         for (int i = 0; i < tensor_size; i++)
@@ -220,7 +219,7 @@ void TFLiteInferenceEngine::Init()
             {
                 LOG(INFO) << i << ": " << interpreter_->tensor(i)->name << ", " << interpreter_->tensor(i)->bytes
                           << ", " << interpreter_->tensor(i)->type << ", " << interpreter_->tensor(i)->params.scale
-                          << ", " << interpreter_->tensor(i)->params.zero_point << "\n";
+                          << ", " << interpreter_->tensor(i)->params.zero_point;
             }
         }
     }
@@ -234,8 +233,8 @@ void TFLiteInferenceEngine::Init()
     {
         const auto inputs = interpreter_->inputs();
         const auto outputs = interpreter_->outputs();
-        LOG(INFO) << "number of inputs: " << inputs.size() << "\n";
-        LOG(INFO) << "number of outputs: " << outputs.size() << "\n";
+        LOG(INFO) << "number of inputs: " << inputs.size();
+        LOG(INFO) << "number of outputs: " << outputs.size();
     }
 
     if (interpreter_->AllocateTensors() != TfLiteStatus::kTfLiteOk)
@@ -278,12 +277,12 @@ void TFLiteInferenceEngine::Execute()
     const auto labels = GetLabelList();
     PrintOutput(results, labels);
 
-    LOG(INFO) << "Retriving " << (interpreter_->tensors_size() - 1) << " tensors...\n";
+    LOG(INFO) << "Retriving " << (interpreter_->tensors_size() - 1) << " tensors...";
     const auto intermediate_outputs = GetIntermediateOutput();
-    LOG(INFO) << "Writing " << intermediate_outputs.size() << " tensors to file...\n";
+    LOG(INFO) << "Writing " << intermediate_outputs.size() << " tensors to file...";
     std::for_each(intermediate_outputs.begin(), intermediate_outputs.end(),
                   [&](const auto& output) { WriteToFile(GetResultDirectory(), output.first, output.second); });
-    LOG(INFO) << "Completed writing " << intermediate_outputs.size() << " tensors to file!!\n";
+    LOG(INFO) << "Completed writing " << intermediate_outputs.size() << " tensors to file!!";
 }
 
 void TFLiteInferenceEngine::Shutdown() {}
@@ -296,14 +295,14 @@ void TFLiteInferenceEngine::InvokeInference()
 
     if (interpreter_->Invoke() != TfLiteStatus::kTfLiteOk)
     {
-        LOG(FATAL) << "Failed to invoke tflite!\n";
+        LOG(FATAL) << "Failed to invoke tflite!";
     }
 
     gettimeofday(&stop_time, nullptr);
-    LOG(INFO) << "invoked \n";
+    LOG(INFO) << "invoked ";
     auto avg_time_in_ms = (get_us(stop_time) - get_us(start_time)) / (GetLoopCount() * 1000);
     auto images_per_sec = (1.0 / avg_time_in_ms) * 1000.0;
-    LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) \n";
+    LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) ";
     WriteToFile(GetResultDirectory(), "images_per_second.txt", "images_per_second: " + std::to_string(images_per_sec));
 }
 

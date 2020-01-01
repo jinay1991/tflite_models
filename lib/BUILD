@@ -34,6 +34,13 @@ cc_library(
 )
 
 cc_library(
+    name = "logging",
+    srcs = glob(["src/logging/*.cpp"]),
+    hdrs = glob(["include/perception/logging/*.h"]),
+    strip_include_prefix = "include",
+)
+
+cc_library(
     name = "utils",
     srcs = glob(["src/utils/*.cpp"]),
     hdrs = glob(
@@ -65,6 +72,9 @@ cc_library(
         "-Werror",
     ],
     strip_include_prefix = "include",
+    deps = [
+        ":logging",
+    ],
 )
 
 cc_library(
@@ -83,6 +93,7 @@ cc_library(
     deps = [
         ":argument_parser",
         ":image_helpers",
+        ":logging",
         ":utils",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",

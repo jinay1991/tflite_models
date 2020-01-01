@@ -5,8 +5,7 @@
 #include <iostream>
 
 #include "perception/argument_parser/argument_parser.h"
-
-#define LOG(x) std::cerr
+#include "perception/logging/logging.h"
 
 namespace perception
 {
@@ -26,8 +25,7 @@ void PrintUsage()
               << "--num_results, -r: number of results to show\n"
               << "--threads, -t: number of threads\n"
               << "--verbose, -v: [0|1] print more information\n"
-              << "--result_directory, -d: directory path\n"
-              << "\n";
+              << "--result_directory, -d: directory path\n";
 }
 }  // namespace
 ArgumentParser::ArgumentParser() : cli_options_{} {}

@@ -26,7 +26,7 @@ void Perception::SelectInferenceEngine(const InferenceEngineType& type)
             break;
         case InferenceEngineType::kInvalid:
         default:
-            throw std::runtime_error("Unsupported for InferenceEngine \n");
+            throw std::runtime_error("Unsupported for InferenceEngine");
             break;
     }
 }
