@@ -13,7 +13,7 @@ namespace perception
 class Perception
 {
   public:
-    /// @brief Supported Inference Engines 
+    /// @brief Supported Inference Engines
     enum class InferenceEngineType : std::int32_t
     {
         kInvalid = 0,
@@ -26,13 +26,13 @@ class Perception
     /// @brief Selects Inference Engine type and creates instance of it.
     virtual void SelectInferenceEngine(const InferenceEngineType& type);
 
-    /// @brief Initialise Inference Engine 
+    /// @brief Initialise Inference Engine
     virtual void Init();
 
     /// @brief Executes Inference Engine for given Image, n times. n=cli.loop_count
     virtual void Execute();
-    
-    /// @brief Release Inference Engine 
+
+    /// @brief Release Inference Engine
     virtual void Shutdown();
 
   private:

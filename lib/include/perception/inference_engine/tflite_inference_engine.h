@@ -29,10 +29,10 @@ class TFLiteInferenceEngine : public InferenceEngineBase
 
     /// @brief Initialise TFLite Inference Engine
     virtual void Init() override;
-    
+
     /// @brief Execute Inference with TFLite Inference Engine
     virtual void Execute() override;
-    
+
     /// @brief Release TFLite Inference Engine
     virtual void Shutdown() override;
 

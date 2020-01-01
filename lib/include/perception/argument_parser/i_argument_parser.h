@@ -13,7 +13,7 @@ class IArgumentParser
 {
   public:
     virtual ~IArgumentParser() = default;
-        
+
     /// @brief Provides Parsed Arguments
     virtual CLIOptions GetParsedArgs() const = 0;
 
