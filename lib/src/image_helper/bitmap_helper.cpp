@@ -48,7 +48,7 @@ std::vector<std::uint8_t> BitmapImageHelper::ReadImage(const std::string& input_
 
     if (!width || !height || !channels)
     {
-        throw std::runtime_error("Received nullptr for width/height/channels.\n");
+        throw std::runtime_error("Received nullptr for width/height/channels.");
     }
     *width = width_;
     *height = height_;
@@ -107,7 +107,7 @@ std::vector<std::uint8_t> BitmapImageHelper::DecodeImage(const std::uint8_t* inp
                     output[dst_pos + 3] = input[src_pos + 3];
                     break;
                 default:
-                    throw std::runtime_error("Unexpected number of channels: " + std::to_string(channels_) + "\n");
+                    throw std::runtime_error("Unexpected number of channels: " + std::to_string(channels_));
             }
         }
     }

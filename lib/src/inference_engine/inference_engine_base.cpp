@@ -13,13 +13,13 @@
 #include "perception/inference_engine/inference_engine_base.h"
 #include "perception/utils/get_top_n.h"
 
-#define ASSERT_PATH_EXISTS(path)                                     \
-    do                                                               \
-    {                                                                \
-        if (!std::experimental::filesystem::exists(path))            \
-        {                                                            \
-            throw std::runtime_error(path + " does not exists!!\n"); \
-        }                                                            \
+#define ASSERT_PATH_EXISTS(path)                                   \
+    do                                                             \
+    {                                                              \
+        if (!std::experimental::filesystem::exists(path))          \
+        {                                                          \
+            throw std::runtime_error(path + " does not exists!!"); \
+        }                                                          \
     } while (0);
 
 namespace perception
@@ -56,7 +56,7 @@ std::vector<std::string> InferenceEngineBase::GetLabelList() const
     std::ifstream file(label_path_);
     if (!file)
     {
-        throw std::runtime_error("Labels file " + label_path_ + " not found\n");
+        throw std::runtime_error("Labels file " + label_path_ + " not found");
     }
     labels.clear();
     std::string line;
@@ -98,7 +98,7 @@ std::string InferenceEngineBase::GetResultDirectory() const
     {
         if (!std::experimental::filesystem::create_directory(dirname))
         {
-            throw std::runtime_error("Unable to create directory\n");
+            throw std::runtime_error("Unable to create directory {" + dirname + "}");
         }
     }
     return dirname;
