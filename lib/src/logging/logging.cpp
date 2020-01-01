@@ -18,7 +18,7 @@ namespace perception
 {
 namespace logging
 {
-LoggingWrapper::LoggingWrapper(const LogSeverity& severity) : LoggingWrapper{severity, false} {}
+LoggingWrapper::LoggingWrapper(const LogSeverity& severity) : LoggingWrapper{severity, true} {}
 
 LoggingWrapper::LoggingWrapper(const LogSeverity& severity, const bool should_log)
     : severity_{severity}, should_log_{should_log}
