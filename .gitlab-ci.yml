@@ -14,14 +14,18 @@ clang-format:
   script:
     - find . -regex '.*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)' -exec cat {} \; | diff -u <(find . -regex '.*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)' -exec clang-format-6.0 -style=file {} -verbose \;) -
   only:
-    - merge_requests
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
+    refs:
+      - merge_requests
 
 buildifier:
   stage: check
   script:
     - buildifier -v -d -r .
   only:
-    - merge_requests
+    refs:
+      - merge_requests
 
 cppcheck:
   stage: check
@@ -37,8 +41,10 @@ cppcheck:
       - static_code_analysis.log
     expire_in: 7 days
   only:
-    - merge_requests
-    - master
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
+    refs:
+      - merge_requests
   
 code_quality:
   image: docker:stable
@@ -59,7 +65,10 @@ code_quality:
     reports:
       codequality: gl-code-quality-report.json
   only:
-    - merge_requests
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
+    refs:
+      - merge_requests
     
 # ------------
 # Stage: Build
@@ -159,5 +168,7 @@ pages:
     paths:
       - public
   only:
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
