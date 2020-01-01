@@ -23,13 +23,13 @@ namespace perception
 BitmapImageHelper::BitmapImageHelper() : width_{224}, height_{224}, channels_{3} {}
 BitmapImageHelper::~BitmapImageHelper() {}
 
-std::vector<std::uint8_t> BitmapImageHelper::ReadImage(const std::string& input_name, std::int32_t* width,
+std::vector<std::uint8_t> BitmapImageHelper::ReadImage(const std::string& image_path, std::int32_t* width,
                                                        std::int32_t* height, std::int32_t* channels)
 {
-    std::ifstream file(input_name, std::ios::in | std::ios::binary);
+    std::ifstream file(image_path, std::ios::in | std::ios::binary);
     if (!file)
     {
-        throw std::runtime_error("Input file " + input_name + " not found");
+        throw std::runtime_error("Input file " + image_path + " not found");
     }
     auto begin = file.tellg();
     file.seekg(0, std::ios::end);

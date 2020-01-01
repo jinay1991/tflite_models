@@ -13,11 +13,15 @@ clang-format:
   stage: check
   script:
     - find . -regex '.*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)' -exec cat {} \; | diff -u <(find . -regex '.*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)' -exec clang-format-6.0 -style=file {} -verbose \;) -
+  only:
+    - merge_requests
 
 buildifier:
   stage: check
   script:
     - buildifier -v -d -r .
+  only:
+    - merge_requests
 
 cppcheck:
   stage: check
@@ -32,7 +36,9 @@ cppcheck:
       - static_code_analysis.xml
       - static_code_analysis.log
     expire_in: 7 days
-
+  only:
+    - merge_requests
+  
 code_quality:
   image: docker:stable
   stage: check
@@ -51,7 +57,9 @@ code_quality:
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
-
+  only:
+    - merge_requests
+    
 # ------------
 # Stage: Build
 # ------------

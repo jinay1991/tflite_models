@@ -25,7 +25,8 @@ void PrintUsage()
               << "--num_results, -r: number of results to show\n"
               << "--threads, -t: number of threads\n"
               << "--verbose, -v: [0|1] print more information\n"
-              << "--result_directory, -d: directory path\n";
+              << "--result_directory, -d: directory path\n"
+              << "--help, -h: print help\n";
 }
 }  // namespace
 ArgumentParser::ArgumentParser() : cli_options_{} {}
@@ -43,8 +44,9 @@ ArgumentParser::ArgumentParser(int argc, char* argv[])
                     {"threads", required_argument, nullptr, 't'},
                     {"verbose", required_argument, nullptr, 'v'},
                     {"result_directory", required_argument, nullptr, 'd'},
+                    {"help", 0, nullptr, 'h'},
                     {nullptr, 0, nullptr, 0}},
-      optstring_{"b:c:d:e:i:l:m:p:r:s:v:t:"}
+      optstring_{"b:c:d:e:h:i:l:m:p:r:s:v:t:"}
 {
     cli_options_ = ParseArgs(argc, argv);
 }

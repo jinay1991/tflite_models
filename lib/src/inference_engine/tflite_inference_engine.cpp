@@ -33,6 +33,7 @@ namespace perception
 {
 namespace
 {
+/// @brief Convert to usec (microseconds)
 constexpr double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
 
 inline std::ostream& operator<<(std::ostream& os, const TfLiteIntArray* v)
@@ -93,6 +94,7 @@ inline std::ostream& operator<<(std::ostream& os, const TfLiteType& type)
     return os;
 }
 
+/// @brief Resize Provided Image using TFLite Interpreter
 template <class T>
 void ResizeImage(T* out, const std::uint8_t* in, const std::int32_t image_height, const std::int32_t image_width,
                  const std::int32_t image_channels, const std::int32_t wanted_height, const std::int32_t wanted_width,
@@ -158,6 +160,7 @@ void ResizeImage(T* out, const std::uint8_t* in, const std::int32_t image_height
     }
 }
 
+/// @brief Write given content buffer to file
 void WriteToFile(const std::string& dirname, const std::string& filename, const std::string& content)
 {
     const auto filepath = std::string{dirname + "/" + filename};
@@ -169,6 +172,7 @@ void WriteToFile(const std::string& dirname, const std::string& filename, const 
     file << content;
 }
 
+/// @brief Print Results
 void PrintOutput(const std::vector<std::pair<float, std::int32_t>>& top_results, const std::vector<std::string>& labels)
 {
     for (const auto& result : top_results)

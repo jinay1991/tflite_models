@@ -22,9 +22,11 @@ class ArgumentParser : public IArgumentParser
     explicit ArgumentParser(int argc, char* argv[]);
     virtual ~ArgumentParser();
 
+    /// @brief Provides Parsed Arguments
     virtual CLIOptions GetParsedArgs() const override;
 
   protected:
+    /// @brief Parse Arguments from argc, argv
     virtual CLIOptions ParseArgs(int argc, char* argv[]) override;
 
   private:

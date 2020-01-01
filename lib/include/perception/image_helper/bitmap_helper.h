@@ -19,7 +19,13 @@ class BitmapImageHelper : public IImageHelper
     BitmapImageHelper();
     virtual ~BitmapImageHelper();
 
-    virtual std::vector<std::uint8_t> ReadImage(const std::string& input_name, std::int32_t* width,
+    /// @brief Read Bitmap (BMP) Image file.
+    /// @param [in] image_path - Path to BMP Image
+    /// @param [out] width - Image Width
+    /// @param [out] height - Image Height
+    /// @param [out] channels - Image Channels
+    /// @return data - Image Data (vector<uint8_t>)
+    virtual std::vector<std::uint8_t> ReadImage(const std::string& image_path, std::int32_t* width,
                                                 std::int32_t* height, std::int32_t* channels) override;
 
   private:

@@ -21,7 +21,13 @@ class JpegImageHelper : public IImageHelper
     JpegImageHelper();
     virtual ~JpegImageHelper();
 
-    virtual std::vector<std::uint8_t> ReadImage(const std::string& input_jpeg_name, std::int32_t* width,
+    /// @brief Read JPG Image file.
+    /// @param [in] image_path - Path to JPG Image
+    /// @param [out] width - Image Width
+    /// @param [out] height - Image Height
+    /// @param [out] channels - Image Channels
+    /// @return data - Image Data (vector<uint8_t>)
+    virtual std::vector<std::uint8_t> ReadImage(const std::string& image_path, std::int32_t* width,
                                                 std::int32_t* height, std::int32_t* channels) override;
 
   private:

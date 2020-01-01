@@ -11,10 +11,10 @@ namespace perception
 JpegImageHelper::JpegImageHelper() {}
 JpegImageHelper::~JpegImageHelper() {}
 
-std::vector<std::uint8_t> JpegImageHelper::ReadImage(const std::string& input_jpeg_name, std::int32_t* width,
+std::vector<std::uint8_t> JpegImageHelper::ReadImage(const std::string& image_path, std::int32_t* width,
                                                      std::int32_t* height, std::int32_t* channels)
 {
-    std::ifstream jpeg_image{input_jpeg_name};
+    std::ifstream jpeg_image{image_path};
     std::string jpeg_data((std::istreambuf_iterator<char>(jpeg_image)), std::istreambuf_iterator<char>());
     jpeg_decoder_ = std::make_unique<Jpeg::Decoder>(jpeg_data.c_str(), jpeg_data.size());
 
