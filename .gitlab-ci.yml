@@ -77,6 +77,8 @@ bazel-build-and-test:
     name: TestResults
     when: on_success
   only:
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
 
@@ -95,6 +97,8 @@ code-coverage:
     when: on_success
     expire_in: 1 day
   only:
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
 
@@ -108,6 +112,8 @@ doxygen:
       - doc
     expire_in: 1 day
   only:
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
       
@@ -126,6 +132,8 @@ smoke-test:
       - intermediate_layers
     expire_in: 7 days
   only:
+    changes: 
+      - .*\.\(ino\|cpp\|hpp\|cc\|cxx\|h\)
     refs:
       - master
   
