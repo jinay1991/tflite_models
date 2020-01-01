@@ -56,8 +56,8 @@ TEST(TFLiteInferenceEngineTest, WhenInvalidModelPath)
 TEST(TFLiteInferenceEngineTest, WhenInvalidLabelPath)
 {
     TFLiteInferenceEngine unit;
-    unit.label_path_ = "invalid";
-    EXPECT_THROW(unit.GetLabelList(), std::runtime_error);
+    unit.cli_options_.labels_name = "test.txt";
+    EXPECT_EXIT(unit.GetLabelList(), ::testing::KilledBySignal(SIGABRT), "");
 }
 }  // namespace
 }  // namespace perception

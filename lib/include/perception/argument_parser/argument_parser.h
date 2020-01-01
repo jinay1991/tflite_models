@@ -37,8 +37,13 @@ class ArgumentParser : public IArgumentParser
     virtual CLIOptions ParseArgs(int argc, char* argv[]) override;
 
   private:
+    /// @brief parsed arguments
     CLIOptions cli_options_;
+
+    /// @brief long option list
     std::vector<struct option> long_options_;
+
+    /// @brief short option list
     std::string optstring_;
 };
 

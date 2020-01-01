@@ -37,6 +37,7 @@ class JpegImageHelper : public IImageHelper
     /// @brief Decode Image Data from provided image buffer
     virtual std::vector<std::uint8_t> DecodeImage(const std::uint8_t* input) const override;
 
+    /// @brief JPG Decoder
     std::unique_ptr<Jpeg::Decoder> jpeg_decoder_;
 };
 }  // namespace perception

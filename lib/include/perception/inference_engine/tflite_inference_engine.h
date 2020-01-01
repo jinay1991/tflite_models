@@ -56,7 +56,10 @@ class TFLiteInferenceEngine : public InferenceEngineBase
     /// @brief Set Image Data to Model Input (via Interpreter)
     virtual void SetInputData(const std::vector<std::uint8_t>& image_data);
 
+    /// @brief TFLite Model Buffer Instance
     std::unique_ptr<tflite::FlatBufferModel> model_;
+
+    /// @brief TFLite Model Interpreter instance
     std::unique_ptr<tflite::Interpreter> interpreter_;
 };
 

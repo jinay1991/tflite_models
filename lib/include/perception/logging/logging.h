@@ -51,8 +51,13 @@ class LoggingWrapper
     std::stringstream& Stream();
 
   private:
+    /// @brief Logged String Stream
     std::stringstream stream_;
+
+    /// @brief Severity Level for Logging
     LogSeverity severity_;
+
+    /// @brief Enable/Disable Logging
     bool should_log_;
 };
 }  // namespace logging

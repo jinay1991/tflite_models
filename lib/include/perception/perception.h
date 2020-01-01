@@ -42,7 +42,10 @@ class Perception
     virtual void Shutdown();
 
   private:
+    /// @brief Inference Engine Instance.
     std::unique_ptr<IInferenceEngine> inference_engine_;
+
+    /// @brief Argument Parser Instance, which contains parsed args.
     std::unique_ptr<IArgumentParser> argument_parser_;
 };
 

@@ -35,8 +35,13 @@ class BitmapImageHelper : public IImageHelper
     /// @brief Decodes Image Data from given data buffer
     virtual std::vector<std::uint8_t> DecodeImage(const std::uint8_t* input) const override;
 
+    /// @brief Image Width
     std::int32_t width_;
+
+    /// @brief Image Height
     std::int32_t height_;
+
+    /// @brief Image Channels
     std::int32_t channels_;
 };
 }  // namespace perception

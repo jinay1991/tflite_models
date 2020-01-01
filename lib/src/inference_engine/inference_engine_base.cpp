@@ -11,6 +11,7 @@
 #include "perception/image_helper/bitmap_helper.h"
 #include "perception/image_helper/jpeg_helper.h"
 #include "perception/inference_engine/inference_engine_base.h"
+#include "perception/logging/logging.h"
 #include "perception/utils/get_top_n.h"
 
 #define ASSERT_PATH_EXISTS(path)                                   \
@@ -26,19 +27,13 @@ namespace perception
 {
 InferenceEngineBase::InferenceEngineBase() : InferenceEngineBase{CLIOptions{}} {}
 InferenceEngineBase::InferenceEngineBase(const CLIOptions& cli_options)
-    : cli_options_{cli_options},
-      channels_{3},
-      height_{224},
-      width_{224},
-      image_path_{cli_options_.input_name},
-      label_path_{cli_options_.labels_name},
-      model_path_{cli_options_.model_name}
+    : cli_options_{cli_options}, channels_{3}, height_{224}, width_{224}
 {
-    ASSERT_PATH_EXISTS(model_path_);
-    ASSERT_PATH_EXISTS(image_path_);
-    ASSERT_PATH_EXISTS(label_path_);
+    ASSERT_PATH_EXISTS(cli_options_.model_name);
+    ASSERT_PATH_EXISTS(cli_options_.labels_name);
+    ASSERT_PATH_EXISTS(cli_options_.input_name);
 
-    if (absl::EndsWith(image_path_, ".bmp"))
+    if (absl::EndsWith(cli_options_.input_name, ".bmp"))
     {
         image_helper_ = std::make_unique<BitmapImageHelper>();
     }
@@ -53,11 +48,9 @@ InferenceEngineBase::~InferenceEngineBase() {}
 std::vector<std::string> InferenceEngineBase::GetLabelList() const
 {
     std::vector<std::string> labels;
-    std::ifstream file(label_path_);
-    if (!file)
-    {
-        throw std::runtime_error("Labels file " + label_path_ + " not found");
-    }
+    std::ifstream file(cli_options_.labels_name);
+    ASSERT_CHECK(file.is_open()) << "Labels file " << cli_options_.labels_name << " not found";
+
     labels.clear();
     std::string line;
     while (std::getline(file, line))
@@ -76,14 +69,14 @@ std::vector<std::string> InferenceEngineBase::GetLabelList() const
 
 std::vector<std::uint8_t> InferenceEngineBase::GetImageData()
 {
-    return image_helper_->ReadImage(image_path_, &width_, &height_, &channels_);
+    return image_helper_->ReadImage(cli_options_.input_name, &width_, &height_, &channels_);
 }
 
 std::int32_t InferenceEngineBase::GetImageWidth() const { return width_; }
 std::int32_t InferenceEngineBase::GetImageHeight() const { return height_; }
 std::int32_t InferenceEngineBase::GetImageChannels() const { return channels_; }
-std::string InferenceEngineBase::GetModelPath() const { return model_path_; }
-std::string InferenceEngineBase::GetImagePath() const { return image_path_; }
+std::string InferenceEngineBase::GetModelPath() const { return cli_options_.model_name; }
+std::string InferenceEngineBase::GetImagePath() const { return cli_options_.input_name; }
 
 bool InferenceEngineBase::IsSaveResultsEnabled() const { return cli_options_.save_results; }
 bool InferenceEngineBase::IsProfilingEnabled() const { return cli_options_.profiling; }

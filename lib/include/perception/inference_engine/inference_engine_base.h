@@ -87,13 +87,23 @@ class InferenceEngineBase : public IInferenceEngine
     virtual std::string GetResultDirectory() const;
 
   private:
+    /// @brief Command Line Interface Options
     CLIOptions cli_options_;
+    /// @brief Image Channels
     std::int32_t channels_;
+    /// @brief Image Height
     std::int32_t height_;
+    /// @brief Image Width
     std::int32_t width_;
+    /// @brief Image Path
     std::string image_path_;
+    /// @brief Label Path
     std::string label_path_;
+
+    /// @brief Model Path
     std::string model_path_;
+
+    /// @brief Image Reader Helper
     std::unique_ptr<IImageHelper> image_helper_;
 };
 
