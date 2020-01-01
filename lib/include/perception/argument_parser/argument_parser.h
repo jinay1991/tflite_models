@@ -18,8 +18,15 @@ namespace perception
 class ArgumentParser : public IArgumentParser
 {
   public:
+    /// @brief Default Constructor
     ArgumentParser();
+
+    /// @brief Constructor
+    /// @param [in] argc - number of arguments
+    /// @param [in] argv - list of arguments
     explicit ArgumentParser(int argc, char* argv[]);
+
+    /// @brief Destructor
     virtual ~ArgumentParser();
 
     /// @brief Provides Parsed Arguments

@@ -83,10 +83,13 @@ std::int32_t InferenceEngineBase::GetImageWidth() const { return width_; }
 std::int32_t InferenceEngineBase::GetImageHeight() const { return height_; }
 std::int32_t InferenceEngineBase::GetImageChannels() const { return channels_; }
 std::string InferenceEngineBase::GetModelPath() const { return model_path_; }
+std::string InferenceEngineBase::GetImagePath() const { return image_path_; }
 
+bool InferenceEngineBase::IsSaveResultsEnabled() const { return cli_options_.save_results; }
 bool InferenceEngineBase::IsProfilingEnabled() const { return cli_options_.profiling; }
 bool InferenceEngineBase::IsVerbosityEnabled() const { return cli_options_.verbose; }
 std::int32_t InferenceEngineBase::GetNumberOfThreads() const { return cli_options_.number_of_threads; }
+std::int32_t InferenceEngineBase::GetNumberOfResults() const { return cli_options_.number_of_results; }
 std::int32_t InferenceEngineBase::GetMaxProfilingBufferEntries() const
 {
     return cli_options_.max_profiling_buffer_entries;

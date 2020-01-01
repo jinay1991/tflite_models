@@ -20,8 +20,14 @@ namespace perception
 class InferenceEngineBase : public IInferenceEngine
 {
   public:
+    /// @brief Default Constructor
     InferenceEngineBase();
+
+    /// @brief Constructor
+    /// @param [in] cli_options - Command Line Interface Options
     explicit InferenceEngineBase(const CLIOptions& cli_options);
+
+    /// @brief Destructor
     virtual ~InferenceEngineBase();
 
   protected:
@@ -43,16 +49,26 @@ class InferenceEngineBase : public IInferenceEngine
     /// @brief Provides Model Path
     virtual std::string GetModelPath() const;
 
+    /// @brief Provides Image Path
+    virtual std::string GetImagePath() const;
+
     /// @brief Reads CLI Option for Profiling Enabled?
-    /// @return true if cli arg `-p` is set to 1, else false
+    /// @return true if cli arg `--profiling` is set to 1, else false
     virtual bool IsProfilingEnabled() const;
 
     /// @brief Reads CLI Option for Verbosity Enabled?
-    /// @return true if cli arg `-v` is set to 1, else false
+    /// @return true if cli arg `--verbose` is set to 1, else false
     virtual bool IsVerbosityEnabled() const;
+
+    /// @brief Reads CLI Option for Save Results Enabled?
+    /// @return true if cli arg `--save_results` is set to 1, else false.
+    virtual bool IsSaveResultsEnabled() const;
 
     /// @brief Reads CLI Option for Number of threads to use for Inference
     virtual std::int32_t GetNumberOfThreads() const;
+
+    /// @brief Reads CLI Option for Number of Results to produce
+    virtual std::int32_t GetNumberOfResults() const;
 
     /// @brief Reads CLI Option for Maximum Profiling Buffer Entries.
     /// @note  Used only when `-p` is set to 1.

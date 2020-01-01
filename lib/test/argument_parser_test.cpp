@@ -29,7 +29,7 @@ TEST(ArgumentParserTest, DefaultConstructor)
     EXPECT_THAT(actual.input_name, ::testing::Eq("data/grace_hopper.jpg"));
     EXPECT_THAT(actual.labels_name, ::testing::Eq("data/labels.txt"));
     EXPECT_EQ(actual.model_name, "external/mobilenet_v2_1.0_224_quant/mobilenet_v2_1.0_224_quant.tflite");
-    EXPECT_THAT(actual.result_directory, ::testing::Eq("intermediate_tensors"));
+    EXPECT_THAT(actual.result_directory, ::testing::Eq("results"));
 }
 TEST(ArgumentParserTest, WhenHelpArgument)
 {

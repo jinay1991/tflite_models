@@ -16,7 +16,10 @@ namespace perception
 class BitmapImageHelper : public IImageHelper
 {
   public:
+    /// @brief Constructor
     BitmapImageHelper();
+
+    /// @brief Destructor
     virtual ~BitmapImageHelper();
 
     /// @brief Read Bitmap (BMP) Image file.
@@ -29,6 +32,7 @@ class BitmapImageHelper : public IImageHelper
                                                 std::int32_t* height, std::int32_t* channels) override;
 
   private:
+    /// @brief Decodes Image Data from given data buffer
     virtual std::vector<std::uint8_t> DecodeImage(const std::uint8_t* input) const override;
 
     std::int32_t width_;

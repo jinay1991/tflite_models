@@ -17,6 +17,7 @@ limitations under the License.
 #include <iostream>
 
 #include "perception/image_helper/bitmap_helper.h"
+#include "perception/logging/logging.h"
 
 namespace perception
 {

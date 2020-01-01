@@ -7,6 +7,7 @@
 
 #include "perception/argument_parser/i_argument_parser.h"
 #include "perception/inference_engine/tflite_inference_engine.h"
+#include "perception/logging/logging.h"
 #include "perception/perception.h"
 
 namespace perception

@@ -13,6 +13,7 @@ namespace perception
 class IInferenceEngine
 {
   public:
+    /// @brief Destructor
     virtual ~IInferenceEngine() = default;
 
     /// @brief Initialise Inference Engine

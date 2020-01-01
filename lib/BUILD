@@ -17,6 +17,13 @@ cc_library(
 )
 
 cc_library(
+    name = "logging",
+    srcs = glob(["src/logging/*.cpp"]),
+    hdrs = glob(["include/perception/logging/*.h"]),
+    strip_include_prefix = "include",
+)
+
+cc_library(
     name = "image_helpers",
     srcs = glob(["src/image_helper/*.cpp"]),
     hdrs = glob(
@@ -30,14 +37,8 @@ cc_library(
     strip_include_prefix = "include",
     deps = [
         ":jpeg_decoder",
+        ":logging",
     ],
-)
-
-cc_library(
-    name = "logging",
-    srcs = glob(["src/logging/*.cpp"]),
-    hdrs = glob(["include/perception/logging/*.h"]),
-    strip_include_prefix = "include",
 )
 
 cc_library(

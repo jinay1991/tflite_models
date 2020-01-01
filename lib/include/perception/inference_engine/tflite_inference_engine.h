@@ -23,8 +23,14 @@ namespace perception
 class TFLiteInferenceEngine : public InferenceEngineBase
 {
   public:
+    /// @brief Default Constructor
     TFLiteInferenceEngine();
+
+    /// @brief Constructor
+    /// @param [in] cli_options - Command Line Interface Options
     explicit TFLiteInferenceEngine(const CLIOptions& cli_options);
+
+    /// @brief Destructor
     virtual ~TFLiteInferenceEngine();
 
     /// @brief Initialise TFLite Inference Engine

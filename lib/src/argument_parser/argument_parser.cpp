@@ -16,6 +16,7 @@ void PrintUsage()
     LOG(INFO) << "label_image\n"
               << "--count, -c: loop interpreter->Invoke() for certain times\n"
               << "--input_mean, -b: input mean\n"
+              << "--result_directory, -d: directory path\n"
               << "--input_std, -s: input standard deviation\n"
               << "--image, -i: image_name.bmp\n"
               << "--max_profiling_buffer_entries, -e: maximum profiling buffer entries\n"
@@ -25,7 +26,7 @@ void PrintUsage()
               << "--num_results, -r: number of results to show\n"
               << "--threads, -t: number of threads\n"
               << "--verbose, -v: [0|1] print more information\n"
-              << "--result_directory, -d: directory path\n"
+              << "--save_results, -f: [0:1] save results in result_directory\n"
               << "--help, -h: print help\n";
 }
 }  // namespace
@@ -44,6 +45,7 @@ ArgumentParser::ArgumentParser(int argc, char* argv[])
                     {"threads", required_argument, nullptr, 't'},
                     {"verbose", required_argument, nullptr, 'v'},
                     {"result_directory", required_argument, nullptr, 'd'},
+                    {"save_results", required_argument, nullptr, 'f'},
                     {"help", 0, nullptr, 'h'},
                     {nullptr, 0, nullptr, 0}},
       optstring_{"b:c:d:e:h:i:l:m:p:r:s:v:t:"}
@@ -82,6 +84,9 @@ CLIOptions ArgumentParser::ParseArgs(int argc, char* argv[])
                 break;
             case 'e':
                 cli_options_.max_profiling_buffer_entries = strtol(optarg, nullptr, 10);
+                break;
+            case 'f':
+                cli_options_.save_results = strtol(optarg, nullptr, 10);
                 break;
             case 'i':
                 cli_options_.input_name = optarg;

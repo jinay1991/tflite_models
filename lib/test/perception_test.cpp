@@ -13,32 +13,45 @@ namespace perception
 {
 namespace
 {
-TEST(PerceptionTest, WhenSelectInferenceEngine)
+class PerceptionTestFixture : public ::testing::Test
 {
-    auto argument_parser = std::make_unique<ArgumentParser>();
-    Perception unit{std::move(argument_parser)};
+  public:
+    PerceptionTestFixture()
+        : argument_parser_{std::make_unique<ArgumentParser>()},
+          unit_{std::make_unique<Perception>(std::move(argument_parser_))}
+    {
+    }
 
-    EXPECT_THROW(unit.SelectInferenceEngine(Perception::InferenceEngineType::kInvalid), std::runtime_error);
-    EXPECT_NO_THROW(unit.SelectInferenceEngine(Perception::InferenceEngineType::kTFLiteInferenceEngine));
+  protected:
+    std::unique_ptr<IArgumentParser> argument_parser_;
+    std::unique_ptr<Perception> unit_;
+};
+
+TEST_F(PerceptionTestFixture, WhenSelectInferenceEngine)
+{
+    EXPECT_THROW(unit_->SelectInferenceEngine(Perception::InferenceEngineType::kInvalid), std::runtime_error);
+    EXPECT_NO_THROW(unit_->SelectInferenceEngine(Perception::InferenceEngineType::kTFLiteInferenceEngine));
 }
 
-TEST(PerceptionTest, WhenInitialized)
+TEST_F(PerceptionTestFixture, WhenInitialized)
 {
-    auto argument_parser = std::make_unique<ArgumentParser>();
-    Perception unit{std::move(argument_parser)};
-    EXPECT_NO_THROW(unit.SelectInferenceEngine(Perception::InferenceEngineType::kTFLiteInferenceEngine));
-
-    EXPECT_NO_THROW(unit.Init());
+    unit_->SelectInferenceEngine(Perception::InferenceEngineType::kTFLiteInferenceEngine);
+    EXPECT_NO_THROW(unit_->Init());
 }
-TEST(PerceptionTest, WhenExecute)
+
+TEST_F(PerceptionTestFixture, WhenExecute)
 {
-    auto argument_parser = std::make_unique<ArgumentParser>();
-    Perception unit{std::move(argument_parser)};
-    EXPECT_NO_THROW(unit.SelectInferenceEngine(Perception::InferenceEngineType::kTFLiteInferenceEngine));
-    EXPECT_NO_THROW(unit.Init());
+    unit_->SelectInferenceEngine(Perception::InferenceEngineType::kTFLiteInferenceEngine);
+    unit_->Init();
 
-    EXPECT_NO_THROW(unit.Execute());
-    EXPECT_NO_THROW(unit.Shutdown());
+    EXPECT_NO_THROW(unit_->Execute());
+    EXPECT_NO_THROW(unit_->Shutdown());
 }
+
+TEST_F(PerceptionTestFixture, WhenInvalidInferenceEngine)
+{
+    EXPECT_THROW(unit_->SelectInferenceEngine(Perception::InferenceEngineType::kInvalid), std::runtime_error);
+}
+
 }  // namespace
 }  // namespace perception

@@ -12,6 +12,7 @@ namespace perception
 class IArgumentParser
 {
   public:
+    /// @brief Destructor
     virtual ~IArgumentParser() = default;
 
     /// @brief Provides Parsed Arguments

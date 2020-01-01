@@ -18,9 +18,15 @@ class Perception
     {
         kInvalid = 0,
         kTFLiteInferenceEngine = 1,
+        kTFInferenceEngine = 2,
+        kTorchInferenceEngine = 3
     };
 
+    /// @brief Constructor
+    /// @param [in] argument_parser - Instance of Argument Parser
     explicit Perception(std::unique_ptr<IArgumentParser> argument_parser);
+
+    /// @brief Destructor
     virtual ~Perception();
 
     /// @brief Selects Inference Engine type and creates instance of it.

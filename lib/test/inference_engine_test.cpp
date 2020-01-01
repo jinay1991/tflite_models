@@ -8,8 +8,6 @@
 #define private public
 #define protected public
 #include "perception/inference_engine/tflite_inference_engine.h"
-#define private private
-#define protected protected
 
 namespace perception
 {
@@ -35,20 +33,19 @@ TEST(TFLiteInferenceEngineTest, WhenExecute)
     EXPECT_NO_THROW(unit.Execute());
 
     EXPECT_NO_THROW(unit.Shutdown());
-    EXPECT_EQ(unit.GetResults().size(), 4);
+    EXPECT_EQ(unit.GetResults().size(), CLIOptions().number_of_results);
 }
 
 TEST(TFLiteInferenceEngineTest, WhenExecuteWithCLIOptions)
 {
     CLIOptions cli_options;
-    cli_options.profiling = true;
-    cli_options.verbose = true;
+    cli_options.number_of_results = 2;
     TFLiteInferenceEngine unit{cli_options};
     EXPECT_NO_THROW(unit.Init());
 
     EXPECT_NO_THROW(unit.Execute());
 
-    EXPECT_EQ(unit.GetResults().size(), 4);
+    EXPECT_EQ(unit.GetResults().size(), cli_options.number_of_results);
 }
 TEST(TFLiteInferenceEngineTest, WhenInvalidModelPath)
 {

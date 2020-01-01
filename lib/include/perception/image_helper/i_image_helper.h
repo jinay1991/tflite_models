@@ -14,6 +14,7 @@ namespace perception
 class IImageHelper
 {
   public:
+    /// @brief Destructor
     virtual ~IImageHelper() = default;
 
     /// @brief Read Image file.
@@ -26,6 +27,7 @@ class IImageHelper
                                                 std::int32_t* height, std::int32_t* channels) = 0;
 
   private:
+    /// @brief Decodes Image Data from given data buffer
     virtual std::vector<std::uint8_t> DecodeImage(const std::uint8_t* input_data) const = 0;
 };
 

@@ -26,6 +26,7 @@ namespace logging
 class LoggingWrapper
 {
   public:
+    /// @brief Log Severity Levels
     enum class LogSeverity : std::int32_t
     {
         INFO = 0,
@@ -34,12 +35,19 @@ class LoggingWrapper
         FATAL = 3
     };
 
+    /// @brief Constructor
+    /// @param [in] severity - Logging Severity
     explicit LoggingWrapper(const LogSeverity& severity);
 
+    /// @brief Constructor
+    /// @param [in] severity - Logging Severity
+    /// @param [in] should_log - Enable/Disable Logging
     explicit LoggingWrapper(const LogSeverity& severity, const bool should_log);
 
+    /// @brief Destructor
     ~LoggingWrapper();
 
+    /// @brief Provides Stream containing logged contents
     std::stringstream& Stream();
 
   private:
@@ -50,14 +58,21 @@ class LoggingWrapper
 }  // namespace logging
 }  // namespace perception
 
+/// @brief Log Stream with provided severity level
+/// @param [in] severity - Severity Level (INFO, WARN, ERROR, FATAL)
 #define LOG(severity) \
     perception::logging::LoggingWrapper(perception::logging::LoggingWrapper::LogSeverity::severity).Stream()
 
-#define CHECK(condition)                                                                         \
+/// @brief Checks for Assertion. If condition is false, Log FATAL Error and exit program.
+/// @param [in] condition - condition to be evaluated
+#define ASSERT_CHECK(condition)                                                                  \
     perception::logging::LoggingWrapper(perception::logging::LoggingWrapper::LogSeverity::FATAL, \
                                         (condition) ? false : true)                              \
         .Stream()
 
-#define CHECK_EQ(a, b) BENCHMARK_CHECK(a == b)
+/// @brief Checks for Assertion for Comparision. If a and b are not same, Log FATAL Error and exit program.
+/// @param [in] a - attribute a
+/// @param [in] b - attribute b
+#define ASSERT_CHECK_EQ(a, b) ASSERT_CHECK(a == b)
 
 #endif  /// PERCEPTION_LOGGING_LOGGING_H_

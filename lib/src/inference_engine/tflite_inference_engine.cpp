@@ -165,22 +165,8 @@ void WriteToFile(const std::string& dirname, const std::string& filename, const 
 {
     const auto filepath = std::string{dirname + "/" + filename};
     std::ofstream file(filepath, std::ios::binary);
-    if (!file.is_open())
-    {
-        throw std::runtime_error("Unable to open " + filepath);
-    }
+    ASSERT_CHECK(file.is_open()) << "Unable to open " << filepath;
     file << content;
-}
-
-/// @brief Print Results
-void PrintOutput(const std::vector<std::pair<float, std::int32_t>>& top_results, const std::vector<std::string>& labels)
-{
-    for (const auto& result : top_results)
-    {
-        const float confidence = result.first;
-        const std::int32_t index = result.second;
-        LOG(INFO) << confidence << ": " << labels[index];
-    }
 }
 
 }  // namespace
@@ -193,22 +179,14 @@ TFLiteInferenceEngine::~TFLiteInferenceEngine() {}
 void TFLiteInferenceEngine::Init()
 {
     model_ = tflite::FlatBufferModel::BuildFromFile(GetModelPath().c_str());
-    if (!model_)
-    {
-        throw std::runtime_error("Failed to mmap model " + GetModelPath());
-    }
-    LOG(INFO) << "Loaded model " << GetModelPath();
+    ASSERT_CHECK(model_) << "Failed to mmap model " << GetModelPath();
+    LOG(INFO) << "Loaded model \"" << GetModelPath() << "\"";
     model_->error_reporter();
-    LOG(INFO) << "Resolved reporter.";
 
     tflite::ops::builtin::BuiltinOpResolver resolver;
 
     tflite::InterpreterBuilder(*model_, resolver)(&interpreter_);
-    if (!interpreter_)
-    {
-        throw std::runtime_error("Failed to construct interpreter");
-    }
-    LOG(INFO) << "Built TfLite Interpreter";
+    ASSERT_CHECK(interpreter_) << "Failed to construct interpreter";
     if (IsVerbosityEnabled())
     {
         LOG(INFO) << "tensors size: " << interpreter_->tensors_size();
@@ -255,6 +233,7 @@ void TFLiteInferenceEngine::Init()
 void TFLiteInferenceEngine::Execute()
 {
     SetInputData(GetImageData());
+    LOG(INFO) << "Loaded image \"" << GetImagePath() << "\"";
 
     auto profiler = absl::make_unique<tflite::profiling::Profiler>(GetMaxProfilingBufferEntries());
     interpreter_->SetProfiler(profiler.get());
@@ -275,18 +254,33 @@ void TFLiteInferenceEngine::Execute()
         profiler->Reset();
         auto summary = summarizer.GetOutputString();
         LOG(INFO) << summary;
-        WriteToFile(GetResultDirectory(), "performance_metrics.txt", summary);
+        if (IsSaveResultsEnabled())
+        {
+            WriteToFile(GetResultDirectory(), "performance_metrics.txt", summary);
+        }
     }
     const auto results = GetResults();
     const auto labels = GetLabelList();
-    PrintOutput(results, labels);
 
-    LOG(INFO) << "Retriving " << (interpreter_->tensors_size() - 1) << " tensors...";
-    const auto intermediate_outputs = GetIntermediateOutput();
-    LOG(INFO) << "Writing " << intermediate_outputs.size() << " tensors to file...";
-    std::for_each(intermediate_outputs.begin(), intermediate_outputs.end(),
-                  [&](const auto& output) { WriteToFile(GetResultDirectory(), output.first, output.second); });
-    LOG(INFO) << "Completed writing " << intermediate_outputs.size() << " tensors to file!!";
+    std::stringstream content_stream;
+    std::for_each(results.begin(), results.end(), [&](const auto& result) {
+        const float confidence = result.first;
+        const std::int32_t index = result.second;
+        content_stream << confidence << ": " << labels[index] << "\n";
+    });
+    if (IsSaveResultsEnabled())
+    {
+        WriteToFile(GetResultDirectory(), "top_k_results.txt", content_stream.str());
+    }
+
+    LOG(INFO) << "Top " << GetNumberOfResults() << " Results: \n" << content_stream.str();
+
+    if (IsSaveResultsEnabled())
+    {
+        const auto intermediate_outputs = GetIntermediateOutput();
+        std::for_each(intermediate_outputs.begin(), intermediate_outputs.end(),
+                      [&](const auto& output) { WriteToFile(GetResultDirectory(), output.first, output.second); });
+    }
 }
 
 void TFLiteInferenceEngine::Shutdown() {}
@@ -297,17 +291,21 @@ void TFLiteInferenceEngine::InvokeInference()
     struct timeval stop_time;
     gettimeofday(&start_time, nullptr);
 
-    if (interpreter_->Invoke() != TfLiteStatus::kTfLiteOk)
-    {
-        LOG(FATAL) << "Failed to invoke tflite!";
-    }
+    auto error_code = interpreter_->Invoke();
+    ASSERT_CHECK_EQ(error_code, TfLiteStatus::kTfLiteOk) << "Failed to invoke tflite!";
 
     gettimeofday(&stop_time, nullptr);
-    LOG(INFO) << "invoked ";
     auto avg_time_in_ms = (get_us(stop_time) - get_us(start_time)) / (GetLoopCount() * 1000);
     auto images_per_sec = (1.0 / avg_time_in_ms) * 1000.0;
-    LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) ";
-    WriteToFile(GetResultDirectory(), "images_per_second.txt", "images_per_second: " + std::to_string(images_per_sec));
+    if (IsVerbosityEnabled())
+    {
+        LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) ";
+    }
+    if (IsSaveResultsEnabled())
+    {
+        WriteToFile(GetResultDirectory(), "images_per_second.txt",
+                    "images_per_second: " + std::to_string(images_per_sec));
+    }
 }
 
 void TFLiteInferenceEngine::SetInputData(const std::vector<std::uint8_t>& image_data)
@@ -351,12 +349,12 @@ std::vector<std::pair<float, std::int32_t>> TFLiteInferenceEngine::GetResults() 
     switch (interpreter_->tensor(output)->type)
     {
         case TfLiteType::kTfLiteFloat32:
-            get_top_n<float>(interpreter_->typed_output_tensor<float>(0), output_size, GetNumberOfThreads(), threshold,
+            get_top_n<float>(interpreter_->typed_output_tensor<float>(0), output_size, GetNumberOfResults(), threshold,
                              &top_results, true);
             break;
         case TfLiteType::kTfLiteUInt8:
             get_top_n<std::uint8_t>(interpreter_->typed_output_tensor<std::uint8_t>(0), output_size,
-                                    GetNumberOfThreads(), threshold, &top_results, false);
+                                    GetNumberOfResults(), threshold, &top_results, false);
             break;
         default:
             throw std::runtime_error("cannot handle output type " + std::to_string(interpreter_->tensor(output)->type) +
