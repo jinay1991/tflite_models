@@ -1,7 +1,8 @@
+package(default_visibility = ["//visibility:public"])
+
 filegroup(
     name = "tflite",
     srcs = glob(["**/*.tflite"]),
-    visibility = ["//visibility:public"],
 )
 
 filegroup(
@@ -11,5 +12,4 @@ filegroup(
         "**/*.pbtxt",
         "**/*_info.txt",
     ]),
-    visibility = ["//visibility:public"],
 )

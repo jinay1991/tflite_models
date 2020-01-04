@@ -297,10 +297,9 @@ void TFLiteInferenceEngine::InvokeInference()
     gettimeofday(&stop_time, nullptr);
     auto avg_time_in_ms = (get_us(stop_time) - get_us(start_time)) / (GetLoopCount() * 1000);
     auto images_per_sec = (1.0 / avg_time_in_ms) * 1000.0;
-    if (IsVerbosityEnabled())
-    {
-        LOG(INFO) << "average time: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) ";
-    }
+
+    LOG(INFO) << "Average time taken: " << avg_time_in_ms << " ms. (i.e. " << images_per_sec << " images/second) ";
+
     if (IsSaveResultsEnabled())
     {
         WriteToFile(GetResultDirectory(), "images_per_second.txt",

@@ -1,10 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "darwin",
-    constraint_values = ["@bazel_tools//platforms:osx"],
-)
-
 cc_library(
     name = "jpeg_decoder",
     srcs = ["include/perception/image_helper/jpeg_decoder.h"],
@@ -12,6 +7,7 @@ cc_library(
     copts = [
         "-Wno-error=deprecated-register",
     ],
+    licenses = ["notice"],
     linkstatic = True,
     strip_include_prefix = "include",
 )
@@ -53,7 +49,7 @@ cc_library(
         "-Werror",
     ],
     linkopts = select({
-        ":darwin": [],
+        "//bazel/platforms:macos": [],
         "//conditions:default": ["-lstdc++fs"],
     }),
     strip_include_prefix = "include",
@@ -87,7 +83,7 @@ cc_library(
         "-Werror",
     ],
     linkopts = select({
-        ":darwin": [],
+        "//bazel/platforms:macos": [],
         "//conditions:default": ["-lstdc++fs"],
     }),
     strip_include_prefix = "include",
@@ -134,6 +130,6 @@ cc_test(
     ],
     deps = [
         ":perception",
-        "@com_google_googletest//:gtest_main",
+        "@googletest//:gtest_main",
     ],
 )

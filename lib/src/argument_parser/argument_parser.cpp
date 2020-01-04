@@ -75,42 +75,55 @@ CLIOptions ArgumentParser::ParseArgs(int argc, char* argv[])
         {
             case 'b':
                 cli_options_.input_mean = strtod(optarg, nullptr);
+                LOG(INFO) << "input_mean: " << cli_options_.input_mean;
                 break;
             case 'c':
                 cli_options_.loop_count = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "loop_count: " << cli_options_.loop_count;
                 break;
             case 'd':
                 cli_options_.result_directory = optarg;
+                LOG(INFO) << "result_directory: " << cli_options_.result_directory;
                 break;
             case 'e':
                 cli_options_.max_profiling_buffer_entries = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "max_profiling_buffer_entries: " << cli_options_.max_profiling_buffer_entries;
                 break;
             case 'f':
                 cli_options_.save_results = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "save_results: " << cli_options_.save_results;
                 break;
             case 'i':
                 cli_options_.input_name = optarg;
+                LOG(INFO) << "input_name: " << cli_options_.input_name;
                 break;
             case 'l':
                 cli_options_.labels_name = optarg;
+                LOG(INFO) << "labels_name: " << cli_options_.labels_name;
                 break;
             case 'm':
                 cli_options_.model_name = optarg;
+                LOG(INFO) << "model_name: " << cli_options_.model_name;
                 break;
             case 'p':
                 cli_options_.profiling = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "profiling: " << cli_options_.profiling;
                 break;
             case 'r':
                 cli_options_.number_of_results = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "number_of_results: " << cli_options_.number_of_results;
                 break;
             case 's':
                 cli_options_.input_std = strtod(optarg, nullptr);
+                LOG(INFO) << "input_std: " << cli_options_.input_std;
                 break;
             case 't':
                 cli_options_.number_of_threads = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "number_of_threads: " << cli_options_.number_of_threads;
                 break;
             case 'v':
                 cli_options_.verbose = strtol(optarg, nullptr, 10);
+                LOG(INFO) << "verbose: " << cli_options_.verbose;
                 break;
             case 'h':
             case '?':
