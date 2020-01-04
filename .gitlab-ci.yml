@@ -133,7 +133,7 @@ smoke-test:
     - bazel-build-and-test
   script: 
     - bazel run //:label_image -- -d intermediate_layers -f 1
-    - cp -R bazel-bin/label_image.runfiles/__main__/intermediate_layers .
+    - cp -R bazel-bin/label_image.runfiles/perception/intermediate_layers .
   artifacts:
     paths:
       - intermediate_layers
