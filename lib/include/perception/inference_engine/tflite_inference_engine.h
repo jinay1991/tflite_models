@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file tflite_inference_engine.h
+/// @brief Contains class definitions for TensorFlow Lite Inference Engine
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_INFERENCE_ENGINE_TFLITE_INFERENCE_ENGINE_H_
@@ -20,6 +21,7 @@
 
 namespace perception
 {
+/// @brief TFLite Inference Engine class
 class TFLiteInferenceEngine : public InferenceEngineBase
 {
   public:
@@ -44,9 +46,11 @@ class TFLiteInferenceEngine : public InferenceEngineBase
 
   protected:
     /// @brief Obtain Intermediate Layers/Operations Output
+    /// @return vector of pair of (filename, file content)
     virtual std::vector<std::pair<std::string, std::string>> GetIntermediateOutput() const override;
 
     /// @brief Obtain Results for provided Image
+    /// @return vector of pair of (confidence, label idx)
     virtual std::vector<std::pair<float, std::int32_t>> GetResults() const override;
 
   private:

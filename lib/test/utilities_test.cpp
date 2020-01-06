@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file utilities.cpp
+/// @brief Contains unit tests for utility functions
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <gtest/gtest.h>

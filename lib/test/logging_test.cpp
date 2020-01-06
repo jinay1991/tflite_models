@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file logging_test.cpp
+/// @brief Contains unit tests for Logging APIs
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <gmock/gmock.h>

@@ -53,11 +53,6 @@ cc_library(
         "//conditions:default": ["-lstdc++fs"],
     }),
     strip_include_prefix = "include",
-    deps = [
-        # TODO: Remove dependencies from TensorFlow
-        "@org_tensorflow//tensorflow/lite:framework",
-        "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
-    ],
 )
 
 cc_library(

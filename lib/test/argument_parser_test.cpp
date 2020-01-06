@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file argument_parser_test.cpp
+/// @brief Contains unit tests for Argument Parser APIs
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <gmock/gmock.h>

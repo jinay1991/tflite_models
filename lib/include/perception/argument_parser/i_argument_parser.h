@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file i_argument_parser.h
+/// @brief Contains Argument Parser Interface class
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_ARGUMENT_PARSER_I_ARGUMENT_PARSER_H_
@@ -9,6 +10,7 @@
 
 namespace perception
 {
+/// @brief Argument Parser Interface class
 class IArgumentParser
 {
   public:

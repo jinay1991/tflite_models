@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file perception_test.cpp
+/// @brief Contains unit test as well as component test for Perception APIs
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <gmock/gmock.h>

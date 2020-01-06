@@ -1,5 +1,5 @@
 ///
-/// @file
+/// @file jpeg_helper.cpp
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <fstream>

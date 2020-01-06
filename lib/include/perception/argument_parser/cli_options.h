@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file cli_options.h
+/// @brief Contains command line interface options definitions
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_ARGUMENT_PARSER_CLI_OPTIONS_H_

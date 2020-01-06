@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file jpeg_helper.h
+/// @brief Contains Jpeg Image Helper
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_IMAGE_HELPER_JPEG_HELPER_H_

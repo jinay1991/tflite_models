@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file i_image_helper.h
+/// @brief Contains Inferface for Image Helper
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_IMAGE_HELPER_I_IMAGE_HELPERS_H_

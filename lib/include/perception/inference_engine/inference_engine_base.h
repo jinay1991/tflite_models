@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file inference_engine_base.h
+/// @brief Contains class definitions for Inference Engine base class
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_INFERENCE_ENGINE_INFERENCE_ENGINE_BASE_H_
@@ -17,6 +18,7 @@
 
 namespace perception
 {
+/// @brief Inference Engine Base Abstract class
 class InferenceEngineBase : public IInferenceEngine
 {
   public:

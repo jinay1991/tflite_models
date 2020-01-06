@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file argument_parser.h
+/// @brief Contains Argument Parser definitions
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_ARGUMENT_PARSER_ARGUMENT_PARSER_H_
@@ -15,6 +16,7 @@
 
 namespace perception
 {
+/// @brief Argument Parser class
 class ArgumentParser : public IArgumentParser
 {
   public:

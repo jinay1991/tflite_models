@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file perception.h
+/// @brief Contains Perception Application class definitions
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #ifndef PERCEPTION_PERCEPTION_H_
@@ -10,6 +11,7 @@
 
 namespace perception
 {
+/// @brief Perception application class
 class Perception
 {
   public:

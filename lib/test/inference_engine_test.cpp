@@ -1,5 +1,6 @@
 ///
-/// @file
+/// @file inference_engine_test.cpp
+/// @brief Contains unit tests for Inference Engine APIs
 /// @copyright Copyright (c) 2020. All Rights Reserved.
 ///
 #include <gmock/gmock.h>
