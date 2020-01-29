@@ -368,6 +368,11 @@ std::vector<std::pair<std::string, std::string>> TFLiteInferenceEngine::GetInter
     for (std::size_t tensor_index = 0; tensor_index < interpreter_->tensors_size() - 1; tensor_index++)
     {
         const auto tensor = interpreter_->tensor(tensor_index);
+        if (tensor->name == nullptr)
+        {
+            continue;
+        }
+
         const auto tensor_dims = tensor->dims;
         const auto tensor_channels = tensor_dims->data[tensor_dims->size - 1];
 
