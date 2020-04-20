@@ -9,6 +9,10 @@ RUN apt-get install -y libtool clang-format-6.0
 RUN apt-get install -y git curl
 RUN apt-get install -y wget
 
+RUN apt-get install python python-dev python-pip
+RUN python -m pip install -U pip
+RUN python -m pip install -U future
+
 # Installation of Bazel Package
 RUN echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
 RUN curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
